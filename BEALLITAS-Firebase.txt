@@ -1,0 +1,159 @@
+======================================================================
+ RENDLI — FIREBASE BEÁLLÍTÁS (Authentication + Firestore + Hosting)
+ Projekt: rendli-202608
+======================================================================
+
+MI EZ AZ APP?
+  A Rendli egy vállalkozáskezelő (megrendelések, projektek, ügyfelek,
+  számlák, bevétel/kiadás). A tulaj bejelentkezik, és a saját üzleti
+  adatait kezeli a felhőben (Firestore: vaults/{uid}).
+  PLUSZ: generál egy BEÁGYAZHATÓ megrendelő-űrlapot, amit idegen
+  weboldalba is beteszel. Az ott leadott rendelés a Firestore-ba kerül,
+  és ÉLŐBEN megjelenik a Rendli-fiókodban.
+
+  Három Firebase-szolgáltatás kell:
+    - Authentication → a tulaj bejelentkezése (e-mail/jelszó).
+    - Firestore     → a tulaj adata + a beérkező rendelések + a form-konfig.
+    - Hosting       → a Rendli weboldal kiszolgálása (HTTPS-sel).
+
+
+----------------------------------------------------------------------
+0) ELŐFELTÉTELEK
+----------------------------------------------------------------------
+- Google-fiók, és a projekt már létrehozva: rendli-202608.
+- Firebase CLI a gépen (telepítése lentebb).
+
+
+----------------------------------------------------------------------
+1) FIREBASE CLI TELEPÍTÉSE + BEJELENTKEZÉS (egyszer, gépenként)
+----------------------------------------------------------------------
+    curl -sL https://firebase.tools | bash
+    firebase login
+  Ellenőrzés:  firebase projects:list   (látnod kell a rendli-202608-at)
+
+
+----------------------------------------------------------------------
+2) AUTHENTICATION (bejelentkezés) — a console-ban
+----------------------------------------------------------------------
+MIRE VALÓ: a TULAJ bejelentkezése. (A nyilvános megrendelő-űrlaphoz NEM
+kell bejelentkezés — az a Firestore-szabály engedi bejelentkezés nélkül.)
+
+LÉPÉSEK:
+  Console → Build → Authentication → "Get started"
+    → "Sign-in method" → "Email/Password" → Enable → Save.
+
+
+----------------------------------------------------------------------
+3) FIRESTORE DATABASE (adattár) — a console-ban
+----------------------------------------------------------------------
+  Console → Build → Firestore Database → "Create database"
+    → Régió: europe-west (eur3)   [FIGYELEM: később NEM módosítható]
+    → Mód:   Production mode
+    → Create / Enable.
+
+
+----------------------------------------------------------------------
+4) A DEPLOY-FÁJLOK (már a mappában vannak)
+----------------------------------------------------------------------
+  firebase.json          → Hosting + Firestore beállítás.
+  .firebaserc            → a projekt: rendli-202608.
+  firestore.rules        → biztonsági szabályok (ld. 5. pont).
+  firestore.indexes.json → (üres) index-fájl.
+
+
+----------------------------------------------------------------------
+5) FIRESTORE SZABÁLYOK — MAGYARÁZAT (firestore.rules)
+----------------------------------------------------------------------
+Három rész:
+
+  a) A tulaj privát adata:
+       match /vaults/{uid} {
+         allow read, write: if request.auth != null && request.auth.uid == uid;
+       }
+     → csak a bejelentkezett tulaj éri el a SAJÁT adatát.
+
+  b) Nyilvános form-konfiguráció (a widget ebből tölti a szolgáltatásokat/
+     mezőket — nem érzékeny adat):
+       match /form_configs/{uid} {
+         allow read: if true;                          // bárki OLVASHATJA
+         allow write: if request.auth != null && request.auth.uid == uid;  // csak a tulaj írja
+       }
+
+  c) Beérkező rendelések inboxa (a nyilvános űrlap ide ír):
+       match /inbox/{uid}/items/{docId} {
+         allow create: if request.resource.data.size() < 40;  // bárki LÉTREHOZHAT (méretkorlát)
+         allow read, delete: if request.auth != null && request.auth.uid == uid;  // csak a tulaj olvassa/törli
+       }
+
+Így a beágyazott űrlap (bejelentkezés nélkül) LÉTRE tud hozni egy
+rendelést, de olvasni/törölni csak a tulaj tud. A "firebase deploy" a
+szabályt automatikusan felteszi.
+
+
+----------------------------------------------------------------------
+6) DEPLOY (feltöltés)
+----------------------------------------------------------------------
+A Rendli mappájában:
+
+    cd "<a Rendli mappa útvonala>"
+    firebase deploy
+
+  Felteszi a HOSTINGOT + a FIRESTORE-SZABÁLYT.
+  URL:  https://rendli-202608.web.app
+  Minden módosítás után futtasd újra. (--only hosting / --only firestore:rules)
+
+
+----------------------------------------------------------------------
+7) DEPLOY UTÁN — FONTOS (a beágyazott űrlaphoz)
+----------------------------------------------------------------------
+1. Nyisd meg az élő Rendlit (rendli-202608.web.app) → REGISZTRÁLJ /
+   jelentkezz be → állítsd be az "Űrlap" fülön a szolgáltatásokat/mezőket
+   és MENTS. Ekkor kerül fel a form-konfig a Firestore-ba (form_configs),
+   hogy a widget lássa.
+2. Másold ki az "Űrlap" fülön a GENERÁLT beágyazó kódot, és tedd az
+   idegen weboldalba. (A kód a Firestore inboxba ír → a rendelés a
+   "Megrendelések" fülön élőben megjelenik.)
+3. Tesztelés: küldj be egy próba-rendelést → nézd meg a Megrendeléseknél.
+
+
+----------------------------------------------------------------------
+8) (OPCIONÁLIS) EGYEDI DOMAIN
+----------------------------------------------------------------------
+Console → Build → Hosting → "Add custom domain" (pl. rendli.hu) → DNS.
+Utána: Authentication → Settings → Authorized domains közé is felvenni.
+
+
+----------------------------------------------------------------------
+9) (AJÁNLOTT) APP CHECK — bot-védelem a nyilvános íráshoz
+----------------------------------------------------------------------
+Mivel a megrendelő-űrlap NYILVÁNOSAN ír, botok spammelhetik a beérkező
+listát. Ez ellen az App Check (reCAPTCHA v3) véd.
+FIGYELEM: a reCAPTCHA domain-hez kötött — a beágyazott widgetet csak
+azokon a domaineken engedi, amiket a reCAPTCHA-hoz felveszel. Ha "bárhová"
+ágyazod, ez korlátozó. Amíg kevés, ismert oldalra teszed, praktikus.
+  Console → Build → App Check → a Web app → Register → reCAPTCHA v3
+  → a site key a kódba, a secret a Firebase-be. Először "Unenforced"!
+
+
+----------------------------------------------------------------------
+10) BIZTONSÁG DIÓHÉJBAN
+----------------------------------------------------------------------
+- HTTPS: automatikus (Hosting).
+- Auth + Rules: a tulaj adata uid-re zárva; a nyilvános írás csak
+  "create" + méretkorlát.
+- apiKey: publikus azonosító, nem titok.
+- A form honeypot mezője (_hp) + a méretkorlát alap bot-védelmet ad;
+  App Check tovább erősíti (9. pont).
+
+
+======================================================================
+ GYORS CHECKLIST
+======================================================================
+[ ] 1. Firebase CLI + firebase login
+[ ] 2. Authentication → Email/Password: Enabled
+[ ] 3. Firestore Database létrehozva (europe-west, Production)
+[ ] 6. firebase deploy → rendli-202608.web.app él
+[ ] 7. Bejelentkezés + Űrlap mentése (form-konfig felkerül) + beágyazó kód
+[ ] 7. Próba-rendelés → megjelenik a Megrendeléseknél
+[ ] 8/9. (Opcionális) egyedi domain / App Check
+======================================================================

@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // A tulaj privát üzleti adata — bejelentkezés kötelező, csak a saját uid.
+    match /vaults/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Nyilvános űrlap-konfiguráció: a beágyazott megrendelő-űrlap OLVASSA
+    // (nem érzékeny adat); csak a tulaj írhatja.
+    match /form_configs/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Beérkező rendelések inboxa: a nyilvános űrlap LÉTREHOZHAT (méretkorlát),
+    // de csak a tulaj olvashatja/törölheti. (A widget bekötése a "B rész".)
+    match /inbox/{uid}/items/{docId} {
+      allow create: if request.resource.data.size() < 40;
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
