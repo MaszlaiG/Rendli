@@ -1,0 +1,196 @@
+======================================================================
+  RENDLI — E-MAIL RENDSZER (EmailJS) BEÁLLÍTÁSA
+======================================================================
+
+MI EZ?
+  Amikor valaki a weboldaladra ágyazott megrendelő-űrlapon lead egy
+  rendelést, a Rendli KÉT visszaigazoló e-mailt küld az EmailJS
+  szolgáltatáson keresztül:
+    1) az ÜGYFÉLNEK  -> "Köszönjük a megrendelésed!" (email-sablon.html)
+    2) NEKED (tulaj) -> "Új megrendelés érkezett"    (email-sablon-tulaj.html)
+  Az e-mail közvetlenül a látogató böngészőjéből megy ki (nincs backend).
+
+ELŐFELTÉTEL
+  - EmailJS fiók (ingyenes csomag is elég a kezdéshez): https://www.emailjs.com
+  - Egy e-mail fiók, amiről a levelek mennek (pl. Gmail).
+
+----------------------------------------------------------------------
+LÉPÉSEK
+----------------------------------------------------------------------
+
+1) FIÓK
+   Regisztrálj / lépj be: https://dashboard.emailjs.com
+
+2) EMAIL SERVICE (a küldő fiók)
+   Email Services -> Add New Service -> válaszd ki a szolgáltatód
+   (pl. Gmail), és kösd össze a fiókod.
+   -> Kimásolod: SERVICE ID   (pl. service_xxxxxxx)
+
+3) KÉT EMAIL TEMPLATE
+   Email Templates -> Create New Template. Készíts KETTŐT:
+
+   a) ÜGYFÉL-VISSZAIGAZOLÁS
+      - Content -> "</>" (Code / HTML editor) -> illeszd be a
+        email-sablon.html teljes tartalmát.
+      - Settings fül:
+          To Email   : {{to_email}}
+          From Name  : {{from_name}}
+          Reply To   : {{reply_to}}
+          Subject    : {{subject}}
+      -> Kimásolod: TEMPLATE ID (ez lesz a templateCustomer)
+
+   b) TULAJ-ÉRTESÍTŐ
+      - Code editor -> illeszd be a email-sablon-tulaj.html tartalmát.
+      - Settings fül: ugyanaz, mint fent (To/From/Reply/Subject).
+      -> Kimásolod: TEMPLATE ID (ez lesz a templateOwner)
+
+   A sablonok által használt változók (a kód tölti ki őket):
+      {{from_name}} {{brand_initial}} {{tagline}} {{heading}} {{intro}}
+      {{{details}}}  <- FONTOS: HÁROM kapcsos zárójel (nyers HTML-tábla)!
+      A tulaj-sablon még ezeket is használja a gyors-gombokhoz:
+      {{action_tel}} {{action_mail}}  (üresnél a gomb magától eltűnik)
+
+4) PUBLIC KEY
+   Account -> General (vagy API Keys) -> másold ki a PUBLIC KEY-t.
+
+5) A 4 AZONOSÍTÓ BEÍRÁSA A KÓDBA
+   Nyisd meg: script.js, a fájl tetején (kb. a 934. sor):
+
+     const EMAILJS_CFG = {
+       publicKey:        "IDE_A_PUBLIC_KEY",
+       serviceId:        "IDE_A_SERVICE_ID",
+       templateCustomer: "IDE_AZ_UGYFEL_TEMPLATE_ID",
+       templateOwner:    "IDE_A_TULAJ_TEMPLATE_ID"
+     };
+
+   Ezek publikus azonosítók (nem titkosak) — az EmailJS böngészős
+   használatában mindegyik látható, ez normális.
+
+6) KÖZZÉTÉTEL
+   firebase deploy   (ld. BEALLITAS-Firebase.txt)
+
+7) TESZT
+   Nyisd meg az élő oldaladat, a beágyazott űrlapon adj le egy
+   próba-rendelést, és nézd meg, megjön-e mindkét levél (a tulaj-levél
+   a bejelentkezett fiókod e-mail címére megy).
+
+----------------------------------------------------------------------
+HIBAELHÁRÍTÁS
+----------------------------------------------------------------------
+  - Nyers <tr>...</tr> szöveg látszik a levélben:
+      a template-ben {{details}} helyett {{{details}}} kell (3 kapcsos).
+  - Nem jön levél:
+      * ellenőrizd a 4 azonosítót (elgépelés?),
+      * a Service tényleg össze van kötve a fiókkal,
+      * nézd meg a SPAM mappát,
+      * EmailJS Dashboard -> Email History: mi a hiba,
+      * ingyenes csomagnál van havi küldési limit.
+  - A tulaj-levél nem jön, de az ügyfélé igen:
+      a tulaj e-mail címe a profilodból (Fiók) jön — legyen kitöltve.
+
+======================================================================
+  ELLENŐRZŐLISTA
+======================================================================
+[ ] 1. EmailJS fiók
+[ ] 2. Email Service összekötve  -> serviceId
+[ ] 3a. Ügyfél-template (email-sablon.html)      -> templateCustomer
+[ ] 3b. Tulaj-template  (email-sablon-tulaj.html) -> templateOwner
+[ ] 4. Public Key
+[ ] 5. EMAILJS_CFG kitöltve a script.js-ben
+[ ] 6. firebase deploy
+[ ] 7. Próba-rendelés -> 2 levél megérkezik
+======================================================================
+
+======================================================================
+  BŐVÍTÉS: ÁRAJÁNLAT-SABLON (3. template)
+======================================================================
+  A dashboardon a megkeresés státuszát "Ajánlat elküldve"-re váltva
+  (vagy az "✉ Ajánlat" gombbal) a Rendli egy branded ÁRAJÁNLAT-levelet
+  küld a megrendelőnek — szerkeszthető tételekkel, ÁFA/AAM-mel,
+  érvényességgel és üzenettel. Ehhez EGY HARMADIK template kell.
+
+1) ÚJ TEMPLATE
+   Email Templates -> Create New Template.
+   - Content -> "</>" (Code editor) -> illeszd be a
+     email-sablon-ajanlat.html teljes tartalmát.
+   - Settings fül:
+       To Email : {{to_email}}
+       From Name: {{from_name}}
+       Reply To : {{reply_to}}
+       Subject  : {{subject}}
+   -> Kimásolod: TEMPLATE ID (ez lesz a templateOffer)
+
+   A sablon változói (a kód tölti):
+       {{from_name}} {{brand_initial}} {{tagline}} {{heading}} {{intro}}
+       {{{details}}}    <- 3 kapcsos (tételek + összesítő + érvényesség)
+       {{action_mail}}  <- az "Elfogadom" / "Kérdésem van" gombok címzettje
+
+2) A TEMPLATE ID BEÍRÁSA
+   script.js tetején, az EMAILJS_CFG-ben (a templateOffer sor):
+
+     const EMAILJS_CFG = {
+       publicKey:        "...",
+       serviceId:        "...",
+       templateCustomer: "...",
+       templateOwner:    "...",
+       templateOffer:    "IDE_AZ_ARAJANLAT_TEMPLATE_ID"
+     };
+
+   FONTOS: amíg ez "template_OFFER_ID" marad, az ajánlatküldés hibát jelez
+   ("Nincs beállítva a sablon azonosítója").
+
+3) HONNAN JÖN AZ ADAT
+   - Címzett: a megkeresés (lead) neve + e-mail címe.
+   - Tételek: előtöltve a megkeresés szolgáltatásából/áraból, te szerkeszted.
+   - ÁFA: a Fiók -> Cég adatai (ÁFA-alany? / kulcs) alapján (AAM, ha nem alany).
+   - Feladó/válasz-cím: a cégadataidból (név, e-mail).
+
+4) TESZT
+   Megrendelések fül -> egy megkeresésnél "✉ Ajánlat" -> állítsd össze ->
+   "Ajánlat küldése". A státusz csak SIKERES küldés után lesz
+   "Ajánlat elküldve", és a sorban megjelenik a "✓ Ajánlat elküldve" jelzés.
+
+[ ] 3c. Árajánlat-template (email-sablon-ajanlat.html) -> templateOffer
+[ ] 3c. templateOffer beírva az EMAILJS_CFG-be
+[ ] 3c. Próba-ajánlat kiküldve, megérkezett
+======================================================================
+
+======================================================================
+  BŐVÍTÉS: MEGBÍZÁSI SZERZŐDÉS-SABLON (4. template)
+======================================================================
+  A megkeresés státuszát "Szerződéskötésre vár"-ra váltva (vagy a
+  "📄 Szerződés" gombbal) a Rendli e-mailben elküldi a megbízási
+  szerződést a megrendelőnek. A levél törzsében a teljes szerződés
+  szerepel (a megrendelő ki tudja nyomtatni / PDF-be mentheti).
+
+1) ÚJ TEMPLATE
+   Email Templates -> Create New Template.
+   - Content -> "</>" (Code editor) -> illeszd be a
+     email-sablon-szerzodes.html teljes tartalmát.
+   - Settings: To {{to_email}}, From {{from_name}}, Reply {{reply_to}},
+     Subject {{subject}}.
+   -> Kimásolod: TEMPLATE ID (ez lesz a templateContract)
+
+   Változók: {{from_name}} {{brand_initial}} {{tagline}} {{heading}}
+             {{intro}} {{{details}}} (3 kapcsos! = a teljes szerződés)
+             {{action_mail}} (az "Elfogadom a szerződést" gomb címzettje)
+
+2) A TEMPLATE ID BEÍRÁSA
+   script.js -> EMAILJS_CFG -> templateContract:
+       templateContract: "IDE_A_SZERZODES_TEMPLATE_ID"
+   Amíg "template_CONTRACT_ID" marad, a küldés hibát jelez.
+
+3) FONTOS — JOGI FIGYELMEZTETÉS
+   A generált szerződés SABLON-TERVEZET, tájékoztató jellegű, NEM jogi
+   tanácsadás. Éles használat előtt magyar ÜGYVÉDDEL kell véglegesíttetni.
+   A szögletes zárójeles [ ] részeket ki kell tölteni (a nyomtatási
+   nézetben, a "📄 Megnyitás / PDF" gombbal).
+
+4) HONNAN JÖN AZ ADAT
+   - Felek: Megbízó = a megkeresés (név, e-mail); Megbízott = a cégadataid.
+   - Tárgy + díj + ÁFA: az elfogadott árajánlatból / a cégadatokból.
+
+[ ] 3d. Szerződés-template (email-sablon-szerzodes.html) -> templateContract
+[ ] 3d. templateContract beírva az EMAILJS_CFG-be
+[ ] 3d. Ügyvédi felülvizsgálat a szerződés-sablonon
+======================================================================
