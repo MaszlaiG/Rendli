@@ -2,6 +2,8 @@
 
 **Language / Nyelv:** [English](#english) · [Magyar](#magyar)
 
+**🌐 Live / Élő oldal:** <https://maszlaig.github.io/Rendli/>
+
 **🔗 GitHub:** <!-- Paste the project repository link here / Illeszd be ide a projekt repójának linkjét --> _(link coming soon / link hamarosan)_
 
 ---
@@ -39,13 +41,13 @@ A job can be followed end to end through the lead status:
 ### Files
 
 - `index.html` — the UI (auth gate, sidebar, tabs, modals)
-- `style.css` — the shared "Studio" design + responsive layout
-- `theme.js` — light / dark / auto appearance (keys: `rendli_theme`, `rendli_mode`)
-- `script.js` — auth flow, shared state, dashboard, invoicing (+ PDF view), **order-form generator**, dialogs, i18n
-- `leads.js` — incoming-inbox listener (Firestore), leads/orders module, offer sending
-- `contract.js` — assignment-contract builder, sending and PDF view
-- `firebase-store.js` — Firebase Auth + Firestore data layer (`LocalStore` wrapper)
-- `fit-text.js` — auto-fit for large numeric displays
+- `css/style.css` — the shared "Studio" design + responsive layout
+- `js/theme.js` — light / dark / auto appearance (keys: `rendli_theme`, `rendli_mode`)
+- `js/script.js` — auth flow, shared state, dashboard, invoicing (+ PDF view), **order-form generator**, dialogs, i18n
+- `js/leads.js` — incoming-inbox listener (Firestore), leads/orders module, offer sending
+- `js/contract.js` — assignment-contract builder, sending and PDF view
+- `js/firebase-store.js` — Firebase Auth + Firestore data layer (`LocalStore` wrapper)
+- `js/fit-text.js` — auto-fit for large numeric displays
 - `email-sablon*.html` — EmailJS templates (offer, contract, owner notification, client confirmation)
 - `firebase.json`, `firestore.rules`, `firestore.indexes.json` — Firebase project config
 - `README.md`, `BEALLITAS-Firebase.txt`, `BEALLITAS-EmailJS.txt` — docs / setup notes
@@ -108,13 +110,13 @@ Egy munka végigkövethető a megkeresés státuszán:
 ### Fájlok
 
 - `index.html` — a felület (auth-kapu, oldalsáv, fülek, ablakok)
-- `style.css` — a közös „Stúdió" dizájn + reszponzív elrendezés
-- `theme.js` — világos / sötét / auto megjelenés (kulcsok: `rendli_theme`, `rendli_mode`)
-- `script.js` — auth-folyamat, közös állapot, dashboard, számlázás (+ PDF-nézet), **űrlap-generátor**, párbeszédablakok, i18n
-- `leads.js` — beérkező-mappa figyelése (Firestore), megkeresések/rendelések modul, ajánlatküldés
-- `contract.js` — megbízási szerződés összeállítása, küldése és PDF-nézete
-- `firebase-store.js` — Firebase Auth + Firestore adatréteg (`LocalStore` burkoló)
-- `fit-text.js` — nagy számkijelzők automatikus méretezése
+- `css/style.css` — a közös „Stúdió" dizájn + reszponzív elrendezés
+- `js/theme.js` — világos / sötét / auto megjelenés (kulcsok: `rendli_theme`, `rendli_mode`)
+- `js/script.js` — auth-folyamat, közös állapot, dashboard, számlázás (+ PDF-nézet), **űrlap-generátor**, párbeszédablakok, i18n
+- `js/leads.js` — beérkező-mappa figyelése (Firestore), megkeresések/rendelések modul, ajánlatküldés
+- `js/contract.js` — megbízási szerződés összeállítása, küldése és PDF-nézete
+- `js/firebase-store.js` — Firebase Auth + Firestore adatréteg (`LocalStore` burkoló)
+- `js/fit-text.js` — nagy számkijelzők automatikus méretezése
 - `email-sablon*.html` — EmailJS-sablonok (ajánlat, szerződés, tulajdonosi értesítő, ügyfél-visszaigazolás)
 - `firebase.json`, `firestore.rules`, `firestore.indexes.json` — Firebase projekt-konfiguráció
 - `README.md`, `BEALLITAS-Firebase.txt`, `BEALLITAS-EmailJS.txt` — dokumentáció / beállítási jegyzetek

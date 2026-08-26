@@ -1,10 +1,3 @@
-/*
- * Szerződés-sablonok (tervezetek) a Rendlihez.
- * FONTOS: minden sablon szerkeszthető TERVEZET, nem jogi tanácsadás — használat előtt
- * magyar ügyvéddel véglegesíttetni kell. A jogszabályi hivatkozások tájékoztató jellegűek
- * (Ptk. 2013. évi V. tv.; Szjt. 1999. évi LXXVI. tv.; 191/2009. (IX. 15.) Korm. r.).
- */
-
 function _contractCtx(lead) {
   const si = state.sellerInfo || {};
   const off = lead.offer || {};
@@ -74,13 +67,10 @@ function _contractItems(ctx) {
   );
 }
 
-/* ---------- közös építőelemek ---------- */
-
 function _P(t) {
   return '<p style="margin:6px 0;font-size:13px;line-height:1.6;text-align:justify">' + t + '</p>';
 }
 
-/* Felhasználó által mentett, sablononkénti testreszabás (Szerződések → ✎ Szerkesztés). */
 function _getContractSettings(tplId) {
   return (state.contractTemplates && state.contractTemplates[tplId]) || {};
 }
@@ -290,8 +280,6 @@ function _appendix(title, bodyHtml) {
 function _reminderNote() {
   return '<p style="margin-top:22px;font-size:11px;color:#8a6d1a;background:#fdf6e6;border:1px solid #e6cf8a;border-radius:6px;padding:10px 12px">Emlékeztető: ez sablon-tervezet — használat előtt magyar ügyvéddel véglegesíttesd. A jogszabályok időközben módosulhatnak.</p>';
 }
-
-/* ---------- sablon-építők (mindegyik {t, body} szekciók tömbjét adja) ---------- */
 
 function _buildWeb(ctx, roles) {
   return [
@@ -904,8 +892,6 @@ function _constructionAppendices(ctx) {
   );
 }
 
-/* ---------- sablon-regiszter ---------- */
-
 const CONTRACT_TEMPLATES = {
   web: {
     id: 'web',
@@ -1123,8 +1109,6 @@ function onContractTemplateChange() {
   const typeLbl = tpl.type === 'megbizasi' ? 'megbízási (gondossági kötelem)' : 'vállalkozási (eredménykötelem)';
   note.textContent = 'Jogi típus: ' + typeLbl + ' — ' + tpl.subtitle + '.';
 }
-
-/* ---------- dokumentum összeállítás ---------- */
 
 function buildContractInner(ctx, tplId) {
   const tpl = _getTemplate(tplId || 'web');
