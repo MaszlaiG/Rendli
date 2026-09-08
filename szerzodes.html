@@ -176,12 +176,14 @@
   function showSigned(name, iso, png){
     var sw=document.getElementById('signwrap'); if(sw) sw.remove();
     var when=(iso||'').replace('T',' ').slice(0,16);
+    // Az aláírás a szerződésben a Megrendelő aláírásvonala FÖLÉ kerül (a slotba).
+    var slot=document.querySelector('.rendli-sig-client');
+    if(slot) slot.innerHTML='<img src="'+png+'" alt="aláírás" style="max-height:58px;max-width:92%">';
     document.getElementById('signed-slot').innerHTML =
       '<div class="signwrap"><div class="signed-box">'+
         '<p class="ok">✓ Aláírva — köszönjük!</p>'+
-        '<img src="'+png+'" alt="aláírás" />'+
         '<p class="signed-meta"><strong>'+esc(name)+'</strong><br><span class="m">Aláírás időpontja: '+esc(when)+'</span></p>'+
-      '</div><p class="sign-sub" style="margin-top:12px">A „Mentés PDF-ként" gombbal elmentheted magadnak az aláírt szerződést.</p></div>';
+      '</div><p class="sign-sub" style="margin-top:12px">Az aláírásod bekerült a szerződésbe (a Megrendelő vonala fölé). A „Mentés PDF-ként" gombbal elmentheted magadnak az aláírt szerződést.</p></div>';
   }
 
   // Betöltés: a szerződés lekérése a Firestore-ból (publikus olvasás a tokennel)

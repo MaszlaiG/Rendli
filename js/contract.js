@@ -248,12 +248,16 @@ function _closingBody() {
 function _signaturesBlock(ctx, roles) {
   return (
     '<div style="display:flex;justify-content:space-between;gap:40px;margin-top:44px">' +
-    '<div style="flex:1;text-align:center"><div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
+    '<div style="flex:1;text-align:center">' +
+    '<div class="rendli-sig-client" style="height:64px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden"></div>' +
+    '<div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
     roles.client +
     '<br><strong>' +
     escHtml(ctx.o.nev) +
     '</strong></div></div>' +
-    '<div style="flex:1;text-align:center"><div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
+    '<div style="flex:1;text-align:center">' +
+    '<div style="height:64px"></div>' +
+    '<div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
     roles.provider +
     '<br><strong>' +
     escHtml(ctx.m.nev) +
@@ -1219,17 +1223,24 @@ function viewSignedContract(leadId) {
     .then((snap) => {
       const d = snap.exists ? snap.data() : {};
       const when = (d.signedAt || lead.contract.signedAt || '').replace('T', ' ').slice(0, 16);
-      const sig = d.signaturePng
-        ? '<div class="sig"><strong>Aláírás:</strong><br><img src="' +
-          d.signaturePng +
-          '" alt="aláírás"><div>' +
+      let html = d.html || '';
+      if (d.signaturePng) {
+        // Az aláírás-képet a Megrendelő aláírásvonala FÖLÉ tesszük (a slot-ba).
+        const img =
+          '<img src="' + d.signaturePng + '" alt="aláírás" style="max-height:58px;max-width:92%">';
+        const slot = '<div class="rendli-sig-client" style="height:64px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden">';
+        if (html.indexOf(slot) >= 0) html = html.replace(slot, slot + img);
+        else html += '<div style="margin-top:24px;text-align:center"><div style="border-top:1px solid #333;display:inline-block;padding-top:6px">' + img + '</div></div>';
+        // Szöveges audit-sor a lap alján
+        html +=
+          '<p style="margin-top:22px;font-size:11px;color:#777">Elektronikusan aláírta: <strong>' +
           escHtml(d.signerName || lead.contract.signerName || '') +
-          ' &middot; ' +
+          '</strong> &middot; ' +
           escHtml(when) +
-          '</div></div>'
-        : '';
+          '</p>';
+      }
       const docEl = win.document.getElementById('doc');
-      if (docEl) docEl.innerHTML = (d.html || '') + sig;
+      if (docEl) docEl.innerHTML = html;
     })
     .catch(() => {
       const docEl = win.document.getElementById('doc');
