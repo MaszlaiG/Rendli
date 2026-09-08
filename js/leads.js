@@ -57,6 +57,10 @@ function initPortfolioInboxSync() {
               lead.contract.signerName = entry.signerName || '';
               lead.contract.signedAt = entry.signedAt || new Date().toISOString();
               lead.status = 'megrendelve';
+              // Automatikus projektbe emelés (ha még nincs) — a Projektek közé kerül.
+              if (!state.orders.find((o) => o.leadId === lead.id)) {
+                state.orders.push(_leadToOrder(lead));
+              }
               changed = true;
               // A végleges aláírt példányt (kézjegy-képpel) a contracts dokumentumba
               // írjuk vissza, hogy a vault kicsi maradjon.
@@ -284,18 +288,11 @@ function setLeadDeadline(id, deadline) {
   lead.deadline = deadline;
   save();
 }
-function convertLeadToOrder(id) {
-  const lead = state.leads[id];
-  if (!lead) return;
-  const existing = state.orders.find((o) => o.leadId === id);
-  if (existing) {
-    uiAlert('Ez a megkeresés már projektté lett alakítva.');
-    showTab('orders');
-    return;
-  }
+// Megkeresésből projekt (order) objektum — mellékhatás nélkül, csak visszaadja.
+function _leadToOrder(lead) {
   const order = {
     id: 'ord_' + Date.now().toString(36),
-    leadId: id,
+    leadId: lead.id,
     name: lead.name || [lead.lastname, lead.firstname].filter(Boolean).join(' '),
     type: lead.type || 'Egyéb',
     price: lead.price || 0,
@@ -323,7 +320,18 @@ function convertLeadToOrder(id) {
     paidDate: ''
   };
   order.num = nextOrderNum(order.date);
-  state.orders.push(order);
+  return order;
+}
+function convertLeadToOrder(id) {
+  const lead = state.leads[id];
+  if (!lead) return;
+  const existing = state.orders.find((o) => o.leadId === id);
+  if (existing) {
+    uiAlert('Ez a megkeresés már projektté lett alakítva.');
+    showTab('orders');
+    return;
+  }
+  state.orders.push(_leadToOrder(lead));
   lead.status = 'atirva';
   save();
   renderAll();
@@ -371,26 +379,34 @@ function renderLeadsTable() {
           )
           .join('')}
       </select>`;
-      const offerBtn = `
-      <button class="btn btn-secondary btn-sm" onclick="openOfferModal('${lead.id}')" title="Árajánlat összeállítása és küldése"
+      const _fmtSec = (iso) => escHtml((iso || '').replace('T', ' ').slice(0, 19));
+      const offerAccepted = !!(lead.offer && lead.offer.accepted);
+      const contractSigned = !!(lead.contract && lead.contract.signed);
+      // Ajánlat-gomb csak addig, amíg NINCS elfogadva; utána zöld, másodpercre pontos info + megnézés.
+      const offerBtn = offerAccepted
+        ? ''
+        : `<button class="btn btn-secondary btn-sm" onclick="openOfferModal('${lead.id}')" title="Árajánlat összeállítása és küldése"
         style="margin-left:6px">✉ Ajánlat</button>`;
-      const offerSent =
-        lead.offer && lead.offer.sentAt
-          ? `<div style="font-size:9.5px;color:var(--accent2);margin-top:4px;white-space:nowrap">✓ Ajánlat elküldve: ${escHtml((lead.offer.sentAt || '').slice(0, 10))}</div>`
-          : '';
+      const offerSent = offerAccepted
+        ? `<div style="font-size:9.5px;color:#1e7a34;margin-top:4px;white-space:nowrap">✓ Ajánlat elfogadva: ${_fmtSec(lead.offer.acceptedAt || lead.offer.sentAt)} · <a onclick="viewOffer('${lead.id}')" style="color:#1e7a34;text-decoration:underline;cursor:pointer">megnézés</a></div>`
+        : lead.offer && lead.offer.sentAt
+        ? `<div style="font-size:9.5px;color:var(--accent2);margin-top:4px;white-space:nowrap">✓ Ajánlat elküldve: ${escHtml((lead.offer.sentAt || '').slice(0, 10))}</div>`
+        : '';
       const contractReady = canSendContract(lead);
-      const contractBtn = contractReady
+      // Szerződés-gomb csak addig, amíg NINCS aláírva.
+      const contractBtn = contractSigned
+        ? ''
+        : contractReady
         ? `<button class="btn btn-secondary btn-sm" onclick="openContractModal('${lead.id}')" title="Megbízási szerződés összeállítása és küldése"
           style="margin-left:6px">📄 Szerződés</button>`
         : `<button class="btn btn-secondary btn-sm" disabled
           title="Előbb küldd el az árajánlatot, majd állítsd „Ajánlat elfogadva” állapotra"
           style="margin-left:6px;opacity:.5;cursor:not-allowed">📄 Szerződés</button>`;
-      const contractSent =
-        lead.contract && lead.contract.signed
-          ? `<div style="font-size:9.5px;color:#1e7a34;margin-top:4px;white-space:nowrap">✍ Aláírva: ${escHtml((lead.contract.signedAt || '').slice(0, 10))}${lead.contract.signerName ? ' — ' + escHtml(lead.contract.signerName) : ''} · <a onclick="viewSignedContract('${lead.id}')" style="color:#1e7a34;text-decoration:underline;cursor:pointer">megnézés</a></div>`
-          : lead.contract && lead.contract.sentAt
-          ? `<div style="font-size:9.5px;color:var(--purple);margin-top:4px;white-space:nowrap">✓ Szerződés elküldve: ${escHtml((lead.contract.sentAt || '').slice(0, 10))}</div>`
-          : '';
+      const contractSent = contractSigned
+        ? `<div style="font-size:9.5px;color:#1e7a34;margin-top:4px;white-space:nowrap">✍ Aláírva: ${_fmtSec(lead.contract.signedAt)}${lead.contract.signerName ? ' — ' + escHtml(lead.contract.signerName) : ''} · <a onclick="viewSignedContract('${lead.id}')" style="color:#1e7a34;text-decoration:underline;cursor:pointer">megnézés</a></div>`
+        : lead.contract && lead.contract.sentAt
+        ? `<div style="font-size:9.5px;color:var(--purple);margin-top:4px;white-space:nowrap">✓ Szerződés elküldve: ${escHtml((lead.contract.sentAt || '').slice(0, 10))}</div>`
+        : '';
       const deleteBtn = `
       <button title="Megkeresés törlése" onclick="deleteLead('${lead.id}')"
         style="margin-left:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;border-radius:5px"
@@ -427,7 +443,7 @@ function renderLeadsTable() {
       <td>${deadlineInput}</td>
       <td style="white-space:nowrap">
         ${statusSelect}${deleteBtn}
-        <div style="margin-top:6px">${offerBtn}${contractBtn}</div>
+        ${offerBtn || contractBtn ? `<div style="margin-top:6px">${offerBtn}${contractBtn}</div>` : ''}
         ${offerSent}
         ${contractSent}
       </td>
@@ -661,6 +677,57 @@ function _offerDetailsHtml(items, t, validUntil) {
     validRow +
     '</tbody></table>'
   );
+}
+function viewOffer(leadId) {
+  const lead = state.leads[leadId];
+  if (!lead || !lead.offer || !Array.isArray(lead.offer.items)) {
+    uiAlert('Ehhez a megkereséshez nincs elmentett árajánlat.');
+    return;
+  }
+  const o = lead.offer;
+  const details = _offerDetailsHtml(
+    o.items,
+    { net: o.net, vat: o.vat, gross: o.gross, vatReg: o.vatReg, vatRate: o.vatRate },
+    o.validUntil || ''
+  );
+  const si = state.sellerInfo || {};
+  const bizName = si.name || 'Rendli';
+  const to = lead.name
+    ? '<p style="font-size:13px;color:#5d6b85;margin:0 0 14px">Címzett: <strong style="color:#171c28">' +
+      escHtml(lead.name) +
+      '</strong></p>'
+    : '';
+  const msg = o.message
+    ? '<p style="font-size:13.5px;color:#26303f;white-space:pre-line;margin:0 0 16px">' +
+      escHtml(o.message) +
+      '</p>'
+    : '';
+  const acc = o.accepted
+    ? '<p style="margin-top:22px;font-size:12.5px;color:#1e7a34;font-weight:700">✓ Az ügyfél elfogadta az ajánlatot: ' +
+      escHtml((o.acceptedAt || '').replace('T', ' ').slice(0, 19)) +
+      '</p>'
+    : '';
+  const win = window.open('', '_blank', 'width=900,height=1160');
+  if (!win) {
+    uiAlert('A böngésző blokkolta a felugró ablakot. Engedélyezd az oldal számára.');
+    return;
+  }
+  win.document.write(
+    '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>Árajánlat – ' +
+      escHtml(bizName) +
+      '</title>' +
+      "<style>@page{margin:16mm}body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#1a1a1a;max-width:820px;margin:0 auto;padding:28px 24px}h1{color:#171c28;font-size:22px}" +
+      '.print-btn{position:fixed;top:14px;right:14px;background:#3b5bdb;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer}' +
+      '@media print{.print-btn{display:none}}</style></head><body>' +
+      '<button class="print-btn" onclick="window.print()">Nyomtatás / Mentés PDF-ként</button>' +
+      '<h1>Árajánlatunk</h1>' +
+      to +
+      msg +
+      details +
+      acc +
+      '</body></html>'
+  );
+  win.document.close();
 }
 async function sendOffer() {
   const id = document.getElementById('offer-lead-id').value;
