@@ -27,16 +27,21 @@ A teljes UI **kétnyelvű (HU/EN)**, a megjelenés **világos / sötét / auto**
 ```
 04_Rendli/
 ├── index.html            # teljes DOM: auth-kapu, oldalsáv, fülek, ablakok (modálok)
-├── style.css             # „Stúdió" dizájnrendszer + reszponzív elrendezés + téma-változók
-├── firebase-store.js     # Firebase Auth + Firestore burkoló (LocalStore objektum)
-├── theme.js              # világos/sötét/auto téma (localStorage: rendli_theme, rendli_mode)
-├── fit-text.js           # nagy számkijelzők automatikus zsugorítása
-├── script.js             # az app magja: auth-folyamat, state, dashboard, számlázás, űrlap-generátor, i18n, dialógusok
-├── leads.js              # beérkező megkeresések (Firestore inbox figyelése), ajánlatküldés
-├── contract.js           # megbízási szerződés összeállítása, küldése, PDF-nézet
-├── email-sablon*.html    # EmailJS sablonok (ajánlat, szerződés, tulajdonosi értesítő, ügyfél-visszaigazolás)
-├── firebase.json / firestore.rules / firestore.indexes.json   # Firebase projekt-konfiguráció
-└── rendli-pelda-adatok.json   # példa state (importálható demó adat)
+├── ajanlat.html          # önálló, publikus árajánlat-nézet a megrendelőnek (a link # részéből dekódol, "Mentés PDF-ként" + "Elfogadom" gomb – utóbbi a Firestore inboxba írja az elfogadást, amit a fiók élőben "Ajánlat elfogadva"-ra állít)
+├── szerzodes.html        # önálló, publikus szerződés-aláíró oldal (a szerződést a Firestore contracts/<uid>/docs/<token> dokumentumból tölti, RAJZOLT aláírás + név → inboxba, a fiók "Megrendelve"-re vált és elmenti az aláírt példányt)
+├── README.md             # projekt-áttekintés (a gyökérben marad – GitHub nyitólap)
+├── css/
+│   └── style.css         # „Stúdió" dizájnrendszer + reszponzív elrendezés + téma-változók
+├── js/
+│   ├── firebase-store.js # Firebase Auth + Firestore burkoló (LocalStore objektum)
+│   ├── theme.js          # világos/sötét/auto téma (localStorage: rendli_theme, rendli_mode)
+│   ├── fit-text.js       # nagy számkijelzők automatikus zsugorítása
+│   ├── script.js         # az app magja: auth-folyamat, state, dashboard, számlázás, űrlap-generátor, i18n, dialógusok
+│   ├── leads.js          # beérkező megkeresések (Firestore inbox figyelése), ajánlatküldés
+│   └── contract.js       # megbízási szerződés összeállítása, küldése, PDF-nézet
+├── e-mail sablonok/      # EmailJS sablonok (email-sablon*.html: ajánlat, szerződés, tulajdonosi értesítő, ügyfél-visszaigazolás)
+├── dokumentumok/         # DOKUMENTACIO.md, BEALLITAS-EmailJS.txt, BEALLITAS-Firebase.txt, megbizasi-szerzodes-sablon.pdf
+└── firebase/             # Firebase-konfiguráció: firebase.json, .firebaserc, firestore.rules, firestore.indexes.json (innen: firebase deploy)
 ```
 
 **Szkript-betöltési sorrend** (fontos, mert globális függvényekre és a betöltési sorrendre épül):
@@ -194,7 +199,7 @@ Mobil-first CSS. Az oldalsáv telefonon hamburger-menüvé csukódik; a rácsok 
 
 1. Firebase-projekt létrehozása, a konfiguráció kitöltése (`BEALLITAS-Firebase.txt`), a `firestore.rules` telepítése.
 2. EmailJS beállítása és a sablon-azonosítók megadása (`BEALLITAS-EmailJS.txt`).
-3. A fájlok feltöltése bármilyen statikus tárhelyre (Firebase Hosting / GitHub Pages / Netlify / saját szerver).
+3. A fájlok feltöltése GitHubra (GitHub Pages szolgálja ki a weboldalt). A Firebase csak az adattárolás (Auth + Firestore).
 4. Regisztráció, majd a **Fiók** és az **Űrlap** fül beállítása; a generált beágyazó kód a weboldalra másolása.
 
 Nincs build lépés; a fejlesztéshez elég egy statikus fájlkiszolgáló (pl. `python3 -m http.server`).

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Árajánlat</title>
+<style>
+  :root { --blue:#3b5bdb; --ink:#171c28; --muted:#5d6b85; --line:#e4eaf5; --bg:#eef1f8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .bar { position:fixed; top:0; left:0; right:0; display:flex; justify-content:center; align-items:center; gap:10px;
+    padding:12px; background:#ffffff; border-bottom:1px solid #dbe2f0;
+    box-shadow:0 2px 10px rgba(23,28,40,.06); z-index:100; }
+  .btn { border:none; border-radius:9px; padding:11px 22px; font-size:14px; font-weight:700; cursor:pointer;
+    font-family:inherit; text-decoration:none; display:inline-block; }
+  .btn-print { background:var(--blue); color:#fff; }
+  .btn-ghost { background:#fff; color:var(--blue); border:2px solid var(--blue); }
+  .wrap { max-width:800px; margin:80px auto 40px; padding:0 14px; }
+  .sheet { background:#fff; border:1px solid #dbe2f0; border-radius:14px; overflow:hidden; }
+  .head { display:flex; align-items:center; gap:14px; padding:28px 36px 22px; border-bottom:1px solid var(--line); }
+  .avatar { width:52px; height:52px; flex:0 0 52px; background:var(--blue); color:#fff; border-radius:12px;
+    font-size:24px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .biz { font-size:20px; font-weight:800; letter-spacing:-.02em; }
+  .biz-meta { font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5; }
+  .tag { margin-left:auto; text-align:right; }
+  .tag .lbl { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); }
+  .tag .date { font-size:12.5px; color:var(--muted); margin-top:3px; }
+  .body { padding:26px 36px 8px; }
+  h1 { margin:0 0 6px; font-size:24px; font-weight:800; letter-spacing:-.02em; }
+  .to { font-size:13.5px; color:var(--muted); margin:0 0 18px; }
+  .msg { font-size:14px; line-height:1.65; color:#3a4450; white-space:pre-line; margin:0 0 22px; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:9px 10px; border-bottom:2px solid var(--ink); font-size:9.5px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.6px; color:var(--muted); text-align:left; }
+  td { padding:11px 10px; border-bottom:1px solid var(--line); font-size:13px; }
+  .r { text-align:right; white-space:nowrap; } .c { text-align:center; white-space:nowrap; }
+  .tot-lbl { text-align:right; font-size:12.5px; color:var(--muted); }
+  .grand td { border-top:2px solid var(--line); font-weight:800; }
+  .grand .sum { font-size:18px; color:var(--blue); }
+  .valid { padding:16px 36px 0; font-size:12.5px; color:var(--muted); }
+  .note { margin:22px 36px 32px; background:var(--bg); border-left:3px solid var(--blue);
+    border-radius:0 8px 8px 0; padding:13px 16px; font-size:12.5px; color:#2b3550; line-height:1.6; }
+  .foot { text-align:center; font-size:11px; color:#8a94ac; margin:16px 0 0; }
+  .foot b { color:var(--blue); }
+  .err { max-width:520px; margin:120px auto; background:#fff; border:1px solid #dbe2f0; border-radius:14px;
+    padding:32px; text-align:center; color:var(--muted); font-size:14px; line-height:1.6; }
+  .tbl { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .tbl table { min-width:440px; }
+  @media (max-width:520px){
+    .head { padding:22px 18px 18px; gap:10px; }
+    .body { padding:22px 18px 8px; }
+    .valid { padding:14px 18px 0; }
+    .note { margin:18px 18px 26px; }
+    h1 { font-size:21px; }
+    .biz { font-size:18px; }
+  }
+  @page { margin:14mm; }
+  @media print { .tbl { overflow:visible; } .tbl table { min-width:0; } }
+  @media print {
+    body { background:#fff; }
+    .bar { display:none; }
+    .wrap { margin:0; max-width:none; padding:0; }
+    .sheet { border:none; border-radius:0; }
+    .foot { display:none; }
+  }
+  .btn-accept { background:#1e7a34; color:#fff; }
+  .btn-accept[disabled] { opacity:.75; cursor:default; }
+  .btn-accept.pulse { animation:pulse 1.2s ease-in-out 3; }
+  @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(30,122,52,.5); } 50%{ box-shadow:0 0 0 8px rgba(30,122,52,0); } }
+  .toast { position:fixed; top:64px; left:50%; transform:translateX(-50%); max-width:90%; background:#fff;
+    border:1px solid #dbe2f0; border-radius:10px; padding:10px 16px; font-size:13px; color:#7a1f1f;
+    box-shadow:0 4px 14px rgba(23,28,40,.12); z-index:101; text-align:center; }
+  @media print { .toast { display:none; } }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="bar" id="bar" hidden>
+    <button class="btn btn-accept" id="accept-btn" hidden onclick="acceptOffer()">✓ Elfogadom az ajánlatot</button>
+    <button class="btn btn-print" onclick="window.print()">📄 Mentés PDF-ként</button>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <div id="app"></div>
+<script>
+  function ft(n){ return Math.round(Number(n)||0).toLocaleString('hu-HU') + ' Ft'; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function initial(s){ s=(s||'').trim(); return s ? s.charAt(0).toUpperCase() : 'R'; }
+
+  function decode(){
+    var h = location.hash || '';
+    var m = h.match(/[#&]o=([^&]+)/);
+    if(!m) return null;
+    try {
+      var b64 = m[1].replace(/-/g,'+').replace(/_/g,'/');
+      while(b64.length % 4) b64 += '=';
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    } catch(e){ return null; }
+  }
+
+  function render(o){
+    var items = Array.isArray(o.items) ? o.items : [];
+    var net = Number(o.net)||0, vat = Number(o.vat)||0, gross = Number(o.gross)||0;
+    var bizMeta = [o.addr, o.tax ? ('Adószám: '+o.tax) : '', o.email, o.phone].filter(Boolean).map(esc).join(' · ');
+
+    var rows = items.map(function(it){
+      var q = Number(it.q)||0, p = Number(it.p)||0;
+      return '<tr><td>'+esc(it.d)+'</td><td class="c">'+q+'</td><td class="r">'+ft(p)+'</td><td class="r" style="font-weight:600">'+ft(q*p)+'</td></tr>';
+    }).join('');
+
+    var tot = '<tr><td colspan="3" class="tot-lbl">Nettó összesen</td><td class="r">'+ft(net)+'</td></tr>';
+    if(o.vatReg) tot += '<tr><td colspan="3" class="tot-lbl">ÁFA ('+(Number(o.vatRate)||0)+'%)</td><td class="r">'+ft(vat)+'</td></tr>';
+    tot += '<tr class="grand"><td colspan="3" class="tot-lbl">'+(o.vatReg?'Végösszeg (bruttó)':'Végösszeg')+'</td><td class="r sum">'+ft(gross)+'</td></tr>';
+
+    var validHtml = o.valid ? '<div class="valid">Az ajánlat érvényes: <strong style="color:var(--ink)">'+esc(o.valid)+'</strong>-ig.</div>' : '';
+    var msgHtml = o.msg ? '<p class="msg">'+esc(o.msg)+'</p>' : '';
+    var toHtml = o.to ? '<p class="to">Címzett: <strong style="color:var(--ink)">'+esc(o.to)+'</strong></p>' : '';
+
+    document.getElementById('app').innerHTML =
+      '<div class="wrap"><div class="sheet">'+
+        '<div class="head"><div class="avatar">'+esc(initial(o.biz))+'</div>'+
+          '<div><div class="biz">'+esc(o.biz||'Árajánlat')+'</div>'+(bizMeta?'<div class="biz-meta">'+bizMeta+'</div>':'')+'</div>'+
+          '<div class="tag"><div class="lbl">Árajánlat</div>'+(o.date?'<div class="date">'+esc(o.date)+'</div>':'')+'</div>'+
+        '</div>'+
+        '<div class="body"><h1>Árajánlatunk</h1>'+toHtml+msgHtml+
+          '<div class="tbl"><table><thead><tr><th>Tétel</th><th style="text-align:center">Menny.</th><th style="text-align:right">Egységár</th><th style="text-align:right">Összeg</th></tr></thead>'+
+          '<tbody>'+rows+tot+'</tbody></table></div>'+
+        '</div>'+
+        validHtml+
+        '<div class="note">Ha bármi kérdésed van, egyszerűen válaszolj a kapott e-mailre — örömmel segítünk.</div>'+
+      '</div>'+
+      '<p class="foot">Ezt az árajánlatot a <b>Rendli</b> állította össze.</p>'+
+      '</div>';
+    document.title = 'Árajánlat' + (o.biz ? ' – ' + o.biz : '');
+    document.getElementById('bar').hidden = false;
+  }
+
+  // Ugyanaz a projekt-konfig, mint az appban / a beágyazott űrlapban (publikus adat).
+  var FB = { apiKey:"AIzaSyD8Ps4RDjEnN4X-NTdQsoiBp6d-_gR-P5A", authDomain:"rendli-202608.firebaseapp.com", projectId:"rendli-202608", storageBucket:"rendli-202608.firebasestorage.app", messagingSenderId:"638877114951", appId:"1:638877114951:web:24396e83b719f604b04762" };
+
+  function toast(msg){
+    var t=document.getElementById('toast'); if(!t) return;
+    t.textContent=msg; t.hidden=false; setTimeout(function(){ t.hidden=true; }, 6000);
+  }
+
+  function setupAccept(o){
+    if(!(o.uid && o.leadId)) return;   // régi / hiányos link → nincs elfogadás-gomb
+    var btn=document.getElementById('accept-btn');
+    btn.hidden=false;
+    // Ha az e-mail "Elfogadom" gombjából jött (a=1), emeljük ki a gombot (NEM fogad el magától).
+    if(/[#&]a=1(?:&|$)/.test(location.hash)){
+      btn.classList.add('pulse');
+      try { btn.scrollIntoView({ block:'nearest' }); } catch(e){}
+    }
+  }
+
+  // Elfogadás CSAK explicit kattintásra (soha nem oldal-betöltéskor) — így az e-mail
+  // linkelőnéző/szkennelő botok nem tudják véletlenül elfogadottá tenni.
+  function acceptOffer(){
+    var o=OFFER, btn=document.getElementById('accept-btn');
+    if(!o || !o.uid || !o.leadId || (btn && btn.dataset.done)) return;
+    btn.disabled=true; btn.classList.remove('pulse'); btn.textContent='Küldés…';
+    function fail(){
+      btn.disabled=false; btn.textContent='✓ Elfogadom az ajánlatot';
+      toast('Nem sikerült elküldeni az elfogadást. Próbáld újra, vagy válaszolj a kapott e-mailre.');
+    }
+    try {
+      if(typeof firebase==='undefined'){ fail(); return; }
+      if(!firebase.apps.length) firebase.initializeApp(FB);
+      firebase.firestore().collection('inbox').doc(o.uid).collection('items').add({
+        accept:true, leadId:o.leadId, at:new Date().toISOString(),
+        name:o.to||'', biz:o.biz||''
+      }).then(function(){
+        btn.dataset.done='1'; btn.disabled=true; btn.style.cursor='default';
+        btn.textContent='✓ Elfogadva — köszönjük!';
+      }).catch(fail);
+    } catch(e){ fail(); }
+  }
+
+  var OFFER = decode();
+  if(OFFER){ render(OFFER); setupAccept(OFFER); }
+  else {
+    document.getElementById('app').innerHTML =
+      '<div class="err">Ez az árajánlat-link érvénytelen vagy hiányos.<br>Kérlek, nyisd meg a kapott e-mailből a teljes linket.</div>';
+  }
+</script>
+</body>
+</html>

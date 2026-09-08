@@ -6,13 +6,16 @@ MI EZ?
   Amikor valaki a weboldaladra ágyazott megrendelő-űrlapon lead egy
   rendelést, a Rendli KÉT visszaigazoló e-mailt küld az EmailJS
   szolgáltatáson keresztül:
-    1) az ÜGYFÉLNEK  -> "Köszönjük a megrendelésed!" (email-sablon.html)
+    1) az ÜGYFÉLNEK  -> "Köszönjük a megrendelésed!" (email-sablon-megrendelo.html)
     2) NEKED (tulaj) -> "Új megrendelés érkezett"    (email-sablon-tulaj.html)
   Az e-mail közvetlenül a látogató böngészőjéből megy ki (nincs backend).
 
 ELŐFELTÉTEL
   - EmailJS fiók (ingyenes csomag is elég a kezdéshez): https://www.emailjs.com
   - Egy e-mail fiók, amiről a levelek mennek (pl. Gmail).
+
+MEGJEGYZÉS: az alább hivatkozott email-sablon*.html fájlok a projekt
+  "e-mail sablonok/" mappájában találhatók (pl. "e-mail sablonok/email-sablon-megrendelo.html").
 
 ----------------------------------------------------------------------
 LÉPÉSEK
@@ -31,7 +34,7 @@ LÉPÉSEK
 
    a) ÜGYFÉL-VISSZAIGAZOLÁS
       - Content -> "</>" (Code / HTML editor) -> illeszd be a
-        email-sablon.html teljes tartalmát.
+        email-sablon-megrendelo.html teljes tartalmát.
       - Settings fül:
           To Email   : {{to_email}}
           From Name  : {{from_name}}
@@ -47,27 +50,49 @@ LÉPÉSEK
    A sablonok által használt változók (a kód tölti ki őket):
       {{from_name}} {{brand_initial}} {{tagline}} {{heading}} {{intro}}
       {{{details}}}  <- FONTOS: HÁROM kapcsos zárójel (nyers HTML-tábla)!
-      A tulaj-sablon még ezeket is használja a gyors-gombokhoz:
-      {{action_tel}} {{action_mail}}  (üresnél a gomb magától eltűnik)
+      {{{actions}}}  <- szintén HÁROM kapcsos: kész HTML Hívás/Válasz gombok.
+                        MINDKÉT sablon használja (üresnél nem jelenik meg):
+                        - tulaj-sablon: a gombok az ÜGYFÉL telefonjára/e-mailjére,
+                        - ügyfél-sablon: a gombok a VÁLLALKOZÁS telefonjára/e-mailjére
+                          mutatnak (a Fiók → üzleti adatok telefon/e-mail mezőiből).
+      {{footer_note}}  <- a kék/narancs alsó megjegyzés-doboz szövege.
 
 4) PUBLIC KEY
    Account -> General (vagy API Keys) -> másold ki a PUBLIC KEY-t.
 
-5) A 4 AZONOSÍTÓ BEÍRÁSA A KÓDBA
-   Nyisd meg: script.js, a fájl tetején (kb. a 934. sor):
+5) A SABLON-ID-K BEÍRÁSA A KÓDBA
+   Nyisd meg: js/script.js, keresd meg az EMAILJS_CFG blokkot (kb. az
+   1435. sor).
+
+   FONTOS: KÉT EmailJS-FIÓK van, mert az ingyenes csomag fiókonként max
+   2 sablont enged:
+     • Fiók A → a beágyazott űrlap visszaigazolói: MEGRENDELŐ + TULAJ
+     • Fiók B → az appból küldött ÁRAJÁNLAT + SZERZŐDÉS (offer* kulcsok)
+   Minden sablont a SAJÁT fiókja kulcsaival kell használni — egy sablon
+   csak abban a fiókban küldhető, amelyikben létrehoztad!
 
      const EMAILJS_CFG = {
-       publicKey:        "IDE_A_PUBLIC_KEY",
-       serviceId:        "IDE_A_SERVICE_ID",
-       templateCustomer: "IDE_AZ_UGYFEL_TEMPLATE_ID",
-       templateOwner:    "IDE_A_TULAJ_TEMPLATE_ID"
+       // Fiók A (beágyazott űrlap: megrendelő + tulaj)
+       publicKey:        'eTf1OffvvcrBwZcAm',   // Fiók A public key
+       serviceId:        'service_598rmjv',     // Fiók A service
+       templateCustomer: 'template_megrendelo', // Fiók A sablon
+       templateOwner:    'template_tulaj',       // Fiók A sablon
+       // Fiók B (app: árajánlat + szerződés)
+       offerPublicKey:   'VW5KUMRIxcbu5f_h9',   // Fiók B public key
+       offerServiceId:   'service_zwzr5l9',     // Fiók B service
+       templateOffer:    'template_ajanlat',    // Fiók B sablon
+       templateContract: 'template_szerzodes'   // Fiók B sablon
      };
 
    Ezek publikus azonosítók (nem titkosak) — az EmailJS böngészős
-   használatában mindegyik látható, ez normális.
+   használatában mindegyik látható, ez normális. A PRIVÁTKULCSOKAT SOHA
+   ne tedd a kódba. Amíg egy sablon-ID placeholder ("_ID" / "EMAILJS_"),
+   az adott levél nem megy ki.
 
 6) KÖZZÉTÉTEL
-   firebase deploy   (ld. BEALLITAS-Firebase.txt)
+   A fájlok feltöltése GitHubra (GitHub Pages szolgálja ki a weboldalt).
+   A Firestore-szabály felküldése: cd firebase && firebase deploy --only firestore:rules
+   (ld. BEALLITAS-Firebase.txt)
 
 7) TESZT
    Nyisd meg az élő oldaladat, a beágyazott űrlapon adj le egy
@@ -93,11 +118,11 @@ HIBAELHÁRÍTÁS
 ======================================================================
 [ ] 1. EmailJS fiók
 [ ] 2. Email Service összekötve  -> serviceId
-[ ] 3a. Ügyfél-template (email-sablon.html)      -> templateCustomer
+[ ] 3a. Ügyfél-template (email-sablon-megrendelo.html)      -> templateCustomer
 [ ] 3b. Tulaj-template  (email-sablon-tulaj.html) -> templateOwner
 [ ] 4. Public Key
 [ ] 5. EMAILJS_CFG kitöltve a script.js-ben
-[ ] 6. firebase deploy
+[ ] 6. Weboldal fent GitHubon + (cd firebase &&) firebase deploy --only firestore:rules
 [ ] 7. Próba-rendelés -> 2 levél megérkezik
 ======================================================================
 
@@ -123,7 +148,23 @@ HIBAELHÁRÍTÁS
    A sablon változói (a kód tölti):
        {{from_name}} {{brand_initial}} {{tagline}} {{heading}} {{intro}}
        {{{details}}}    <- 3 kapcsos (tételek + összesítő + érvényesség)
-       {{action_mail}}  <- az "Elfogadom" / "Kérdésem van" gombok címzettje
+       {{action_mail}}  <- a "Kérdésem van" gomb címzettje (mailto)
+       {{accept_url}}   <- az "Elfogadom az ajánlatot" gomb linkje. Az ajanlat.html
+                           oldalra visz (a=1), ahol a megrendelő egy explicit
+                           kattintással AUTOMATIKUSAN elfogadottá teszi az ajánlatot:
+                           a Rendli fiókodban a megkeresés magától "Ajánlat elfogadva"
+                           állapotba kerül (Firestore inbox → élő figyelő). Nem kell
+                           kézzel jelölnöd. A {{#if accept_url}}…{{else}}…{{/if}} blokk
+                           üres URL-nél a régi mailto-ra esik vissza — NE töröld.
+       {{pdf_url}}      <- a "Letöltés PDF-ben" gomb linkje (ajanlat.html
+                           oldalra mutat, az ajánlat adata base64-ként a link
+                           # részében). A {{#if pdf_url}} blokk üres URL-nél
+                           elrejti a gombot — ezt a Code editorban NE töröld.
+
+   FONTOS a PDF-letöltéshez: az "ajanlat.html" oldalnak fent kell lennie a
+   weboldal gyökerében (GitHub Pages), ugyanott, ahol az index.html. A kód
+   automatikusan a jelenlegi cím mellé építi a linket (…/ajanlat.html#o=…),
+   így nem kell külön beállítani. Backend/Firestore nem kell hozzá.
 
 2) A TEMPLATE ID BEÍRÁSA
    script.js tetején, az EMAILJS_CFG-ben (a templateOffer sor):
@@ -173,7 +214,18 @@ HIBAELHÁRÍTÁS
 
    Változók: {{from_name}} {{brand_initial}} {{tagline}} {{heading}}
              {{intro}} {{{details}}} (3 kapcsos! = a teljes szerződés)
-             {{action_mail}} (az "Elfogadom a szerződést" gomb címzettje)
+             {{sign_url}}    <- az "Aláírás és elfogadás" gomb linkje. A szerzodes.html
+                                oldalra visz, ahol a megrendelő RAJZOLT ALÁÍRÁSSAL + névvel
+                                aláírja; a fiókodban a megkeresés magától "Megrendelve"-re
+                                vált, és az aláírt példány (kézjeggyel) elmentődik. A
+                                {{#if sign_url}}…{{else}}…{{/if}} blokk üres URL-nél a régi
+                                mailto-ra esik vissza — NE töröld.
+             {{action_mail}} (a mailto-fallback címzettje)
+
+   FONTOS: az aláíráshoz a "szerzodes.html" oldalnak fent kell lennie a weboldal
+   gyökerében (GitHub Pages), ÉS a frissített Firestore-szabályt fel kell tölteni
+   (cd firebase && firebase deploy --only firestore:rules), mert az új "contracts"
+   gyűjteményt a régi szabály még nem engedi olvasni.
 
 2) A TEMPLATE ID BEÍRÁSA
    script.js -> EMAILJS_CFG -> templateContract:

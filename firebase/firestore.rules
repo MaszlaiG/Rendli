@@ -16,9 +16,18 @@ service cloud.firestore {
 
     // Beérkező rendelések inboxa: a nyilvános űrlap LÉTREHOZHAT (méretkorlát),
     // de csak a tulaj olvashatja/törölheti. (A widget bekötése a "B rész".)
+    // Ugyanez a csatorna hozza vissza az ajánlat-elfogadást és a szerződés-aláírást.
     match /inbox/{uid}/items/{docId} {
       allow create: if request.resource.data.size() < 40;
       allow read, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Aláírandó szerződések: a megrendelő az e-mail linkjéből (véletlen, kitalálhatatlan
+    // token) OLVASSA a szerződést; írni/frissíteni/törölni csak a tulaj tud. Az aláírás
+    // maga az inboxon át jön vissza, a tulaj írja be ide a végleges aláírt példányt.
+    match /contracts/{uid}/docs/{docId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && request.auth.uid == uid;
     }
   }
 }

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Szerződés aláírása</title>
+<style>
+  :root { --blue:#3b5bdb; --green:#1e7a34; --ink:#171c28; --muted:#5d6b85; --line:#e4eaf5; --bg:#eef1f8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .bar { position:fixed; top:0; left:0; right:0; display:flex; justify-content:center; align-items:center; gap:10px;
+    padding:12px; background:#ffffff; border-bottom:1px solid #dbe2f0; box-shadow:0 2px 10px rgba(23,28,40,.06); z-index:100; }
+  .btn { border:none; border-radius:9px; padding:11px 22px; font-size:14px; font-weight:700; cursor:pointer;
+    font-family:inherit; text-decoration:none; display:inline-block; }
+  .btn-print { background:var(--blue); color:#fff; }
+  .btn-green { background:var(--green); color:#fff; }
+  .btn-green[disabled] { opacity:.6; cursor:default; }
+  .btn-ghost { background:#fff; color:var(--muted); border:1px solid #cdd6ea; }
+  .wrap { max-width:840px; margin:80px auto 40px; padding:0 14px; }
+  .sheet { background:#fff; border:1px solid #dbe2f0; border-radius:14px; overflow:hidden; }
+  .head { display:flex; align-items:center; gap:14px; padding:26px 34px 20px; border-bottom:1px solid var(--line); }
+  .avatar { width:50px; height:50px; flex:0 0 50px; background:var(--blue); color:#fff; border-radius:12px;
+    font-size:23px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .biz { font-size:19px; font-weight:800; letter-spacing:-.02em; }
+  .tag { margin-left:auto; text-align:right; font-size:11px; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--blue); }
+  .contract { padding:26px 34px 8px; font-size:13.5px; line-height:1.62; color:#26303f; }
+  .contract h1 { font-size:20px; color:var(--ink); }
+  .contract h2, .contract h3 { font-size:15px; color:var(--ink); margin:20px 0 6px; }
+  .contract p { margin:0 0 10px; }
+  .contract strong { color:var(--ink); }
+  .contract table { width:100%; border-collapse:collapse; }
+  .contract td, .contract th { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; }
+  .signwrap { margin:8px 34px 30px; border:1px solid var(--line); border-radius:12px; background:#fafbfe; padding:18px 18px 16px; }
+  .signwrap h3 { margin:0 0 4px; font-size:15px; color:var(--ink); }
+  .sign-sub { margin:0 0 14px; font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .pad-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 6px; }
+  .pad { position:relative; background:#fff; border:1px dashed #b9c4de; border-radius:10px; touch-action:none; }
+  .pad canvas { display:block; width:100%; height:170px; border-radius:10px; }
+  .pad .ph { position:absolute; left:0; right:0; bottom:16px; text-align:center; color:#b3bccf; font-size:12.5px; pointer-events:none; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin-top:14px; }
+  .field { flex:1; min-width:220px; }
+  .field label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 5px; }
+  .field input { width:100%; padding:11px 12px; border:1px solid #cdd6ea; border-radius:9px; font-size:14px; font-family:inherit; color:var(--ink); }
+  .actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .consent { font-size:12px; color:var(--muted); margin:12px 0 0; line-height:1.5; }
+  .signed-box { border:1px solid #cfe6d5; background:#f2faf4; border-radius:12px; padding:16px 18px; }
+  .signed-box .ok { color:var(--green); font-weight:800; font-size:15px; margin:0 0 10px; }
+  .signed-box img { max-height:120px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px; }
+  .signed-meta { font-size:13px; color:var(--ink); margin:10px 0 0; }
+  .signed-meta .m { color:var(--muted); }
+  .legal { padding:0 34px; margin:0 0 26px; font-size:11px; color:#8a94ac; line-height:1.5; }
+  .foot { text-align:center; font-size:11px; color:#8a94ac; margin:16px 0 0; }
+  .foot b { color:var(--blue); }
+  .err { max-width:520px; margin:120px auto; background:#fff; border:1px solid #dbe2f0; border-radius:14px;
+    padding:32px; text-align:center; color:var(--muted); font-size:14px; line-height:1.6; }
+  .toast { position:fixed; top:64px; left:50%; transform:translateX(-50%); max-width:90%; background:#fff;
+    border:1px solid #dbe2f0; border-radius:10px; padding:10px 16px; font-size:13px; color:#7a1f1f;
+    box-shadow:0 4px 14px rgba(23,28,40,.12); z-index:101; text-align:center; }
+  @page { margin:14mm; }
+  @media (max-width:520px){
+    .head { padding:20px 18px 16px; }
+    .contract { padding:20px 18px 8px; }
+    .signwrap { margin:8px 18px 26px; }
+    .legal { padding:0 18px; }
+  }
+  @media print {
+    body { background:#fff; }
+    .bar, .toast, .no-print { display:none !important; }
+    .wrap { margin:0; max-width:none; padding:0; }
+    .sheet { border:none; border-radius:0; }
+    .foot { display:none; }
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="bar" id="bar" hidden>
+    <button class="btn btn-print" onclick="window.print()">📄 Mentés PDF-ként</button>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <div id="app"><div class="err">Szerződés betöltése…</div></div>
+<script>
+  var FB = { apiKey:"AIzaSyD8Ps4RDjEnN4X-NTdQsoiBp6d-_gR-P5A", authDomain:"rendli-202608.firebaseapp.com", projectId:"rendli-202608", storageBucket:"rendli-202608.firebasestorage.app", messagingSenderId:"638877114951", appId:"1:638877114951:web:24396e83b719f604b04762" };
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function initial(s){ s=(s||'').trim(); return s ? s.charAt(0).toUpperCase() : 'R'; }
+  function toast(msg){ var t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.hidden=false; setTimeout(function(){ t.hidden=true; }, 6000); }
+  function showErr(msg){ document.getElementById('app').innerHTML='<div class="err">'+msg+'</div>'; }
+
+  function parseRef(){
+    var m=(location.hash||'').match(/[#&]c=([^.&]+)\.([^.&]+)/);
+    return m ? { uid:m[1], cid:m[2] } : null;
+  }
+
+  var REF=null, DOC=null, PAD=null, DONE=false;
+
+  // Egyszerű aláírás-pad (egér + érintés)
+  function makePad(canvas){
+    var ctx=canvas.getContext('2d');
+    var rect=canvas.getBoundingClientRect(), ratio=window.devicePixelRatio||1;
+    canvas.width=Math.max(1,Math.round(rect.width*ratio));
+    canvas.height=Math.max(1,Math.round(rect.height*ratio));
+    ctx.scale(ratio,ratio);
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#171c28';
+    var drawing=false, last=null, dirty=false;
+    function pos(e){ var r=canvas.getBoundingClientRect(); var p=(e.touches&&e.touches[0])?e.touches[0]:e; return { x:p.clientX-r.left, y:p.clientY-r.top }; }
+    function start(e){ e.preventDefault(); drawing=true; last=pos(e); var ph=canvas.parentNode.querySelector('.ph'); if(ph) ph.style.display='none'; }
+    function move(e){ if(!drawing) return; e.preventDefault(); var p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; dirty=true; }
+    function end(){ drawing=false; }
+    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',end);
+    return {
+      clear:function(){ ctx.clearRect(0,0,canvas.width,canvas.height); dirty=false; var ph=canvas.parentNode.querySelector('.ph'); if(ph) ph.style.display=''; },
+      isEmpty:function(){ return !dirty; },
+      png:function(){ return canvas.toDataURL('image/png'); }
+    };
+  }
+
+  function renderContract(d){
+    document.title = (d.docType || 'Szerződés') + (d.bizName ? ' – ' + d.bizName : '');
+    document.getElementById('app').innerHTML =
+      '<div class="wrap"><div class="sheet">'+
+        '<div class="head"><div class="avatar">'+esc(initial(d.bizName))+'</div>'+
+          '<div><div class="biz">'+esc(d.bizName||'Szerződés')+'</div>'+(d.toName?'<div style="font-size:12.5px;color:#5d6b85;margin-top:3px">Címzett: <strong style="color:#171c28">'+esc(d.toName)+'</strong></div>':'')+'</div>'+
+          '<div class="tag">'+esc(d.docType||'Szerződés')+'</div>'+
+        '</div>'+
+        '<div class="contract">'+(d.html||'')+'</div>'+
+        '<div class="signwrap no-print" id="signwrap">'+
+          '<h3>Aláírás</h3>'+
+          '<p class="sign-sub">Az alábbi mezőbe rajzold be az aláírásod, és add meg a teljes neved. Az „Aláírom és elfogadom" gombbal a szerződés elfogadottá válik.</p>'+
+          '<p class="pad-label">Kézjegy</p>'+
+          '<div class="pad"><canvas id="pad"></canvas><div class="ph">✍ Ide rajzold az aláírásod</div></div>'+
+          '<div class="actions"><button type="button" class="btn btn-ghost" onclick="clearPad()">Törlés</button></div>'+
+          '<div class="row"><div class="field"><label for="signer">Teljes név</label><input id="signer" type="text" placeholder="Pl. Kovács Anna" value="'+esc(d.toName||'')+'" /></div></div>'+
+          '<p class="consent">Az aláírással kijelentem, hogy a fenti szerződést elolvastam és a feltételeit elfogadom. Az aláírás időbélyeggel rögzül.</p>'+
+          '<div class="actions"><button type="button" class="btn btn-green" id="sign-btn" onclick="doSign()">✍ Aláírom és elfogadom</button></div>'+
+        '</div>'+
+        '<div id="signed-slot"></div>'+
+        '<p class="legal">Ez egy dokumentált elektronikus aláírás (kézjegy, név és időbélyeg rögzítésével), nem minősített (eIDAS) elektronikus aláírás.</p>'+
+      '</div>'+
+      '<p class="foot">Ezt a szerződést a <b>Rendli</b> állította össze.</p>'+
+      '</div>';
+    document.getElementById('bar').hidden=false;
+    PAD = makePad(document.getElementById('pad'));
+  }
+
+  function clearPad(){ if(PAD) PAD.clear(); }
+
+  function doSign(){
+    if(DONE) return;
+    var name=(document.getElementById('signer').value||'').trim();
+    if(!name){ toast('Add meg a teljes neved az aláíráshoz.'); return; }
+    if(!PAD || PAD.isEmpty()){ toast('Kérlek, rajzold be az aláírásod a mezőbe.'); return; }
+    var btn=document.getElementById('sign-btn');
+    btn.disabled=true; btn.textContent='Küldés…';
+    var png=PAD.png();
+    var signedAt=new Date().toISOString();
+    function fail(){ btn.disabled=false; btn.textContent='✍ Aláírom és elfogadom'; toast('Az aláírás elküldése nem sikerült. Ellenőrizd a netet, és próbáld újra.'); }
+    try {
+      if(typeof firebase==='undefined'){ fail(); return; }
+      if(!firebase.apps.length) firebase.initializeApp(FB);
+      firebase.firestore().collection('inbox').doc(REF.uid).collection('items').add({
+        contractSign:true, contractId:REF.cid, leadId:(DOC.leadId||''),
+        signerName:name, signedAt:signedAt, signaturePng:png
+      }).then(function(){
+        DONE=true;
+        showSigned(name, signedAt, png);
+      }).catch(fail);
+    } catch(e){ fail(); }
+  }
+
+  function showSigned(name, iso, png){
+    var sw=document.getElementById('signwrap'); if(sw) sw.remove();
+    var when=(iso||'').replace('T',' ').slice(0,16);
+    document.getElementById('signed-slot').innerHTML =
+      '<div class="signwrap"><div class="signed-box">'+
+        '<p class="ok">✓ Aláírva — köszönjük!</p>'+
+        '<img src="'+png+'" alt="aláírás" />'+
+        '<p class="signed-meta"><strong>'+esc(name)+'</strong><br><span class="m">Aláírás időpontja: '+esc(when)+'</span></p>'+
+      '</div><p class="sign-sub" style="margin-top:12px">A „Mentés PDF-ként" gombbal elmentheted magadnak az aláírt szerződést.</p></div>';
+  }
+
+  // Betöltés: a szerződés lekérése a Firestore-ból (publikus olvasás a tokennel)
+  REF = parseRef();
+  if(!REF){ showErr('Ez a szerződés-link érvénytelen.<br>Kérlek, nyisd meg a kapott e-mailből a teljes linket.'); }
+  else {
+    try {
+      if(!firebase.apps.length) firebase.initializeApp(FB);
+      firebase.firestore().collection('contracts').doc(REF.uid).collection('docs').doc(REF.cid).get()
+        .then(function(snap){
+          if(!snap.exists){ showErr('A szerződés nem található. Lehet, hogy visszavonták, vagy lejárt a link.'); return; }
+          DOC = snap.data() || {};
+          renderContract(DOC);
+        })
+        .catch(function(){ showErr('A szerződés betöltése nem sikerült. Ellenőrizd az internetkapcsolatot, és frissítsd az oldalt.'); });
+    } catch(e){ showErr('A szerződés betöltése nem sikerült.'); }
+  }
+</script>
+</body>
+</html>

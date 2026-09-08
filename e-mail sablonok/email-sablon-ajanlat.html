@@ -88,20 +88,83 @@
               >
                 {{heading}}
               </h1>
-              <p style="margin: 0 0 22px 0; font-size: 14px; line-height: 1.65; color: #5d6b85">{{intro}}</p>
+              <p style="margin: 0 0 22px 0; font-size: 14px; line-height: 1.65; color: #5d6b85; white-space: pre-line">
+                {{intro}}
+              </p>
             </td>
           </tr>
 
           <tr>
-            <td style="padding: 0 34px 8px 34px">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-                {{{details}}}
-              </table>
+            <td style="padding: 0 34px 8px 34px">{{{details}}}</td>
+          </tr>
+
+          <tr>
+            <td style="padding: 22px 34px 6px 34px">
+              {{#if pdf_url}}<a
+                href="{{pdf_url}}"
+                style="
+                  display: inline-block;
+                  background: #3b5bdb;
+                  color: #ffffff;
+                  font-weight: 700;
+                  font-size: 14px;
+                  padding: 12px 22px;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  margin: 0 8px 8px 0;
+                "
+                >&#128196; Letöltés PDF-ben</a
+              >{{/if}}
+              {{#if accept_url}}<a
+                href="{{accept_url}}"
+                style="
+                  display: inline-block;
+                  background: #1e7a34;
+                  color: #ffffff;
+                  font-weight: 700;
+                  font-size: 14px;
+                  padding: 12px 22px;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  margin: 0 8px 8px 0;
+                "
+                >&#10003; Elfogadom az ajánlatot</a
+              >{{else}}<a
+                href="mailto:{{action_mail}}?subject=Elfogadom%20az%20%C3%A1raj%C3%A1nlatot"
+                style="
+                  display: inline-block;
+                  background: #1e7a34;
+                  color: #ffffff;
+                  font-weight: 700;
+                  font-size: 14px;
+                  padding: 12px 22px;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  margin: 0 8px 8px 0;
+                "
+                >&#10003; Elfogadom az ajánlatot</a
+              >{{/if}}
+              <a
+                href="mailto:{{action_mail}}?subject=K%C3%A9rd%C3%A9sem%20van%20az%20%C3%A1raj%C3%A1nlatr%C3%B3l"
+                style="
+                  display: inline-block;
+                  background: #ffffff;
+                  color: #3b5bdb;
+                  font-weight: 700;
+                  font-size: 14px;
+                  padding: 10px 20px;
+                  border: 2px solid #3b5bdb;
+                  border-radius: 10px;
+                  text-decoration: none;
+                  margin: 0 8px 8px 0;
+                "
+                >Kérdésem van</a
+              >
             </td>
           </tr>
 
           <tr>
-            <td style="padding: 26px 34px 30px 34px">
+            <td style="padding: 14px 34px 30px 34px">
               <div
                 style="
                   background: #eef1f8;
@@ -113,7 +176,7 @@
                   line-height: 1.6;
                 "
               >
-                Kérdésed van? Egyszerűen válaszolj erre az e-mailre — a levelet a rendszer erre a címre irányítja.
+                Ha bármi kérdésed van, egyszerűen válaszolj erre az e-mailre — örömmel segítünk.
               </div>
             </td>
           </tr>
@@ -129,8 +192,8 @@
             font-family: -apple-system, &quot;Segoe UI&quot;, Arial, sans-serif;
           "
         >
-          Ezt az e-mailt a <strong style="color: #3b5bdb">Rend<span style="color: #3b5bdb">li</span></strong> küldte a
-          weboldalad megrendelő-űrlapja alapján.
+          Ezt az árajánlatot a
+          <strong style="color: #3b5bdb">Rend<span style="color: #3b5bdb">li</span></strong> állította össze.
         </div>
       </td>
     </tr>

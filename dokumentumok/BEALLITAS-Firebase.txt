@@ -1,6 +1,7 @@
 ======================================================================
- RENDLI — FIREBASE BEÁLLÍTÁS (Authentication + Firestore + Hosting)
+ RENDLI — FIREBASE BEÁLLÍTÁS (Authentication + Firestore)
  Projekt: rendli-202608
+ (A weboldalt GitHub-ra töltjük fel — a Firebase csak az adattárolás.)
 ======================================================================
 
 MI EZ AZ APP?
@@ -11,10 +12,13 @@ MI EZ AZ APP?
   weboldalba is beteszel. Az ott leadott rendelés a Firestore-ba kerül,
   és ÉLŐBEN megjelenik a Rendli-fiókodban.
 
-  Három Firebase-szolgáltatás kell:
+  Két Firebase-szolgáltatás kell:
     - Authentication → a tulaj bejelentkezése (e-mail/jelszó).
     - Firestore     → a tulaj adata + a beérkező rendelések + a form-konfig.
-    - Hosting       → a Rendli weboldal kiszolgálása (HTTPS-sel).
+
+  A Rendli weboldalt (és a beágyazható megrendelő-űrlapot) NEM a Firebase
+  Hosting szolgálja ki, hanem GitHub (GitHub Pages). A Firebase itt csak
+  adattárolás (Auth + Firestore).
 
 
 ----------------------------------------------------------------------
@@ -53,12 +57,16 @@ LÉPÉSEK:
 
 
 ----------------------------------------------------------------------
-4) A DEPLOY-FÁJLOK (már a mappában vannak)
+4) A DEPLOY-FÁJLOK (a projekt "firebase/" almappájában vannak)
 ----------------------------------------------------------------------
-  firebase.json          → Hosting + Firestore beállítás.
-  .firebaserc            → a projekt: rendli-202608.
-  firestore.rules        → biztonsági szabályok (ld. 5. pont).
-  firestore.indexes.json → (üres) index-fájl.
+  firebase/firebase.json          → Firestore beállítás (szabály + index fájl).
+  firebase/.firebaserc            → a projekt: rendli-202608.
+  firebase/firestore.rules        → biztonsági szabályok (ld. 5. pont).
+  firebase/firestore.indexes.json → (üres) index-fájl.
+
+  FONTOS: a "firebase deploy" parancsot ebből a "firebase/" mappából
+  futtasd (lásd 6. pont), mert a CLI itt találja a firebase.json + .firebaserc
+  párost.
 
 
 ----------------------------------------------------------------------
@@ -85,28 +93,43 @@ Három rész:
          allow read, delete: if request.auth != null && request.auth.uid == uid;  // csak a tulaj olvassa/törli
        }
 
+  d) Aláírandó szerződések (a megrendelő az e-mail linkjéből nyitja/írja alá):
+       match /contracts/{uid}/docs/{docId} {
+         allow read: if true;   // bárki OLVASHATJA a véletlen tokennel
+         allow create, update, delete: if request.auth != null && request.auth.uid == uid;
+       }
+     → a szerződés szövegét bárki elolvashatja, akinek megvan a kitalálhatatlan
+       link; írni/aláírt példányt visszaírni csak a tulaj tud. Az aláírás maga a
+       fenti inboxon át érkezik vissza.
+
 Így a beágyazott űrlap (bejelentkezés nélkül) LÉTRE tud hozni egy
-rendelést, de olvasni/törölni csak a tulaj tud. A "firebase deploy" a
-szabályt automatikusan felteszi.
+rendelést, de olvasni/törölni csak a tulaj tud. A "firebase deploy
+--only firestore:rules" a szabályt automatikusan felteszi.
+
+FIGYELEM: a "contracts" gyűjtemény ÚJ — a szerződés-aláírás csak azután
+működik, hogy a frissített szabályt felteszed:
+    cd firebase && firebase deploy --only firestore:rules
 
 
 ----------------------------------------------------------------------
-6) DEPLOY (feltöltés)
+6) A FIRESTORE-SZABÁLY FELTÖLTÉSE
 ----------------------------------------------------------------------
-A Rendli mappájában:
+A Rendli "firebase/" almappájában (a weboldal GitHubon van, ide csak a
+Firestore-szabály kerül fel):
 
-    cd "<a Rendli mappa útvonala>"
-    firebase deploy
+    cd "<a Rendli mappa útvonala>/firebase"
+    firebase deploy --only firestore:rules
 
-  Felteszi a HOSTINGOT + a FIRESTORE-SZABÁLYT.
-  URL:  https://rendli-202608.web.app
-  Minden módosítás után futtasd újra. (--only hosting / --only firestore:rules)
+  Felteszi a FIRESTORE-SZABÁLYT. Minden szabálymódosítás után futtasd újra.
 
 
 ----------------------------------------------------------------------
-7) DEPLOY UTÁN — FONTOS (a beágyazott űrlaphoz)
+7) KÖZZÉTÉTEL UTÁN — FONTOS (a beágyazott űrlaphoz)
 ----------------------------------------------------------------------
-1. Nyisd meg az élő Rendlit (rendli-202608.web.app) → REGISZTRÁLJ /
+0. A statikus fájlokat töltsd fel a GitHub repóba, és a GitHub Pages
+   szolgálja ki (Settings → Pages). A GitHub Pages domainjét vedd fel:
+   Authentication → Settings → Authorized domains (különben nincs login).
+1. Nyisd meg az élő Rendlit → REGISZTRÁLJ /
    jelentkezz be → állítsd be az "Űrlap" fülön a szolgáltatásokat/mezőket
    és MENTS. Ekkor kerül fel a form-konfig a Firestore-ba (form_configs),
    hogy a widget lássa.
@@ -119,7 +142,8 @@ A Rendli mappájában:
 ----------------------------------------------------------------------
 8) (OPCIONÁLIS) EGYEDI DOMAIN
 ----------------------------------------------------------------------
-Console → Build → Hosting → "Add custom domain" (pl. rendli.hu) → DNS.
+Egyedi domain a GitHub Pages-nél (repo → Settings → Pages → Custom domain)
++ DNS a domainszolgáltatónál.
 Utána: Authentication → Settings → Authorized domains közé is felvenni.
 
 
@@ -138,7 +162,7 @@ azokon a domaineken engedi, amiket a reCAPTCHA-hoz felveszel. Ha "bárhová"
 ----------------------------------------------------------------------
 10) BIZTONSÁG DIÓHÉJBAN
 ----------------------------------------------------------------------
-- HTTPS: automatikus (Hosting).
+- HTTPS: automatikus (GitHub Pages).
 - Auth + Rules: a tulaj adata uid-re zárva; a nyilvános írás csak
   "create" + méretkorlát.
 - apiKey: publikus azonosító, nem titok.
@@ -152,7 +176,9 @@ azokon a domaineken engedi, amiket a reCAPTCHA-hoz felveszel. Ha "bárhová"
 [ ] 1. Firebase CLI + firebase login
 [ ] 2. Authentication → Email/Password: Enabled
 [ ] 3. Firestore Database létrehozva (europe-west, Production)
-[ ] 6. firebase deploy → rendli-202608.web.app él
+[ ] 5. firebase deploy --only firestore:rules → a szabály felkerült
+[ ] 6. A weboldal fent van GitHubon (GitHub Pages) + a domain az
+       Authorized domains közt
 [ ] 7. Bejelentkezés + Űrlap mentése (form-konfig felkerül) + beágyazó kód
 [ ] 7. Próba-rendelés → megjelenik a Megrendeléseknél
 [ ] 8/9. (Opcionális) egyedi domain / App Check

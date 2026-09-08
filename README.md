@@ -48,8 +48,8 @@ A job can be followed end to end through the lead status:
 - `js/contract.js` — assignment-contract builder, sending and PDF view
 - `js/firebase-store.js` — Firebase Auth + Firestore data layer (`LocalStore` wrapper)
 - `js/fit-text.js` — auto-fit for large numeric displays
-- `email-sablon*.html` — EmailJS templates (offer, contract, owner notification, client confirmation)
-- `firebase.json`, `firestore.rules`, `firestore.indexes.json` — Firebase project config
+- `e-mail sablonok/email-sablon*.html` — EmailJS templates (offer, contract, owner notification, client confirmation)
+- `firebase/` — Firebase project config (`firebase.json`, `.firebaserc`, `firestore.rules`, `firestore.indexes.json`); run `firebase deploy` from inside this folder
 - `README.md`, `BEALLITAS-Firebase.txt`, `BEALLITAS-EmailJS.txt` — docs / setup notes
 
 > Script load order: Firebase SDK → `firebase-store.js` → `theme.js` → `script.js` → `leads.js` → `contract.js`.
@@ -65,7 +65,7 @@ A job can be followed end to end through the lead status:
 
 1. Create a Firebase project and fill in the config (see `BEALLITAS-Firebase.txt`); deploy `firestore.rules`.
 2. Set up EmailJS and the template IDs (see `BEALLITAS-EmailJS.txt`).
-3. **Host the files on any static host** (Firebase Hosting, GitHub Pages, Netlify, your own server) and open the site.
+3. **Publish the files with GitHub Pages** and open the site. (Firebase is used only for data storage — Auth + Firestore.)
 
 On first use, register an account (email + password). Then configure the **Form** tab and copy the generated order-form code onto your website.
 
@@ -117,8 +117,8 @@ Egy munka végigkövethető a megkeresés státuszán:
 - `js/contract.js` — megbízási szerződés összeállítása, küldése és PDF-nézete
 - `js/firebase-store.js` — Firebase Auth + Firestore adatréteg (`LocalStore` burkoló)
 - `js/fit-text.js` — nagy számkijelzők automatikus méretezése
-- `email-sablon*.html` — EmailJS-sablonok (ajánlat, szerződés, tulajdonosi értesítő, ügyfél-visszaigazolás)
-- `firebase.json`, `firestore.rules`, `firestore.indexes.json` — Firebase projekt-konfiguráció
+- `e-mail sablonok/email-sablon*.html` — EmailJS-sablonok (ajánlat, szerződés, tulajdonosi értesítő, ügyfél-visszaigazolás)
+- `firebase/` — Firebase projekt-konfiguráció (`firebase.json`, `.firebaserc`, `firestore.rules`, `firestore.indexes.json`); a `firebase deploy`-t ebből a mappából futtasd
 - `README.md`, `BEALLITAS-Firebase.txt`, `BEALLITAS-EmailJS.txt` — dokumentáció / beállítási jegyzetek
 
 > Szkript-betöltési sorrend: Firebase SDK → `firebase-store.js` → `theme.js` → `script.js` → `leads.js` → `contract.js`.
@@ -134,7 +134,7 @@ Egy munka végigkövethető a megkeresés státuszán:
 
 1. Hozz létre egy Firebase-projektet és töltsd ki a konfigurációt (lásd `BEALLITAS-Firebase.txt`); telepítsd a `firestore.rules`-t.
 2. Állítsd be az EmailJS-t és a sablon-azonosítókat (lásd `BEALLITAS-EmailJS.txt`).
-3. **Töltsd fel a fájlokat tetszőleges statikus tárhelyre** (Firebase Hosting, GitHub Pages, Netlify, saját szerver) és nyisd meg az oldalt.
+3. **Tedd közzé a fájlokat GitHub Pages-szel** és nyisd meg az oldalt. (A Firebase csak az adattárolás — Auth + Firestore.)
 
 Első használatkor regisztrálj egy fiókot (e-mail + jelszó). Ezután állítsd be az **Űrlap** fület, és másold a generált megrendelő-űrlap kódját a weboldaladra.
 

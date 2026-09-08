@@ -1188,6 +1188,55 @@ function printContract(leadId) {
   win.document.close();
 }
 
+function viewSignedContract(leadId) {
+  const lead = state.leads[leadId];
+  if (!lead || !lead.contract || !lead.contract.contractId) {
+    uiAlert('Ehhez a megkereséshez nincs elmentett aláírt szerződés.');
+    return;
+  }
+  const win = window.open('', '_blank', 'width=900,height=1160');
+  if (!win) {
+    uiAlert('A böngésző blokkolta a felugró ablakot. Engedélyezd az oldal számára.');
+    return;
+  }
+  win.document.write(
+    '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>Aláírt szerződés</title>' +
+      "<style>@page{margin:16mm}body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#1a1a1a;max-width:820px;margin:0 auto;padding:28px 24px}h1,h2{color:#171c28}" +
+      '.print-btn{position:fixed;top:14px;right:14px;background:#3b5bdb;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer}' +
+      '.sig{margin-top:28px;border-top:1px solid #e4eaf5;padding-top:16px}.sig img{max-height:120px;border:1px solid #e4eaf5;border-radius:8px;padding:6px;background:#fff}' +
+      '@media print{.print-btn{display:none}}</style></head><body>' +
+      '<button class="print-btn" onclick="window.print()">Nyomtatás / Mentés PDF-ként</button>' +
+      '<div id="doc">Betöltés…</div></body></html>'
+  );
+  win.document.close();
+  firebase
+    .firestore()
+    .collection('contracts')
+    .doc(currentUid)
+    .collection('docs')
+    .doc(lead.contract.contractId)
+    .get()
+    .then((snap) => {
+      const d = snap.exists ? snap.data() : {};
+      const when = (d.signedAt || lead.contract.signedAt || '').replace('T', ' ').slice(0, 16);
+      const sig = d.signaturePng
+        ? '<div class="sig"><strong>Aláírás:</strong><br><img src="' +
+          d.signaturePng +
+          '" alt="aláírás"><div>' +
+          escHtml(d.signerName || lead.contract.signerName || '') +
+          ' &middot; ' +
+          escHtml(when) +
+          '</div></div>'
+        : '';
+      const docEl = win.document.getElementById('doc');
+      if (docEl) docEl.innerHTML = (d.html || '') + sig;
+    })
+    .catch(() => {
+      const docEl = win.document.getElementById('doc');
+      if (docEl) docEl.textContent = 'A szerződés betöltése nem sikerült.';
+    });
+}
+
 function openContractModal(leadId) {
   const lead = state.leads[leadId];
   if (!lead) return;
@@ -1236,7 +1285,7 @@ async function sendContract() {
     return;
   }
   if (!emailjsReady()) {
-    setNote('Az EmailJS nincs beállítva (EMAILJS_CFG). Lásd: BEALLITAS-EmailJS.txt', true);
+    setNote('Az EmailJS nincs beállítva (EMAILJS_CFG). Lásd: dokumentumok/BEALLITAS-EmailJS.txt', true);
     return;
   }
   const tplId = currentContractTemplateId();
@@ -1249,6 +1298,33 @@ async function sendContract() {
   const btn = document.getElementById('contract-send-btn');
   if (btn) btn.disabled = true;
   setNote('Küldés folyamatban…', false);
+  // A szerződést a Firestore-ba tesszük (véletlen tokennel), hogy a megrendelő az
+  // e-mail linkjéről megnyithassa és ALÁÍRHASSA a szerzodes.html oldalon.
+  const contractId =
+    'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  let signUrl = '';
+  try {
+    await firebase
+      .firestore()
+      .collection('contracts')
+      .doc(currentUid)
+      .collection('docs')
+      .doc(contractId)
+      .set({
+        html: details,
+        docType: tpl.docType,
+        bizName: bizName,
+        ownerEmail: ownerMail,
+        toName: lead.name || '',
+        leadId: id,
+        createdAt: new Date().toISOString()
+      });
+    signUrl =
+      new URL('szerzodes.html', location.href).href + '#c=' + currentUid + '.' + contractId;
+  } catch (e) {
+    console.warn('[Rendli] szerződés közzététel:', e);
+    signUrl = '';
+  }
   const params = {
     to_email: lead.email,
     to_name: lead.name || '',
@@ -1258,17 +1334,22 @@ async function sendContract() {
     reply_to: ownerMail,
     subject: tpl.docType + ' – ' + bizName,
     heading: tpl.docType,
-    intro:
-      'Köszönjük, hogy elfogadtad az árajánlatot! Mellékeljük a szerződést. Kérjük, olvasd át; kérdés vagy elfogadás esetén válaszolj erre az e-mailre.',
+    intro: signUrl
+      ? 'Köszönjük, hogy elfogadtad az árajánlatot! Mellékeljük a szerződést. Kérjük, olvasd át, majd az „Aláírás és elfogadás" gombbal írd alá online.'
+      : 'Köszönjük, hogy elfogadtad az árajánlatot! Mellékeljük a szerződést. Kérjük, olvasd át; kérdés vagy elfogadás esetén válaszolj erre az e-mailre.',
     details: details,
-    action_mail: ownerMail
+    action_mail: ownerMail,
+    sign_url: signUrl
   };
   try {
     await emailjsSend(EMAILJS_CFG.templateContract, params);
     lead.status = 'szerzodes';
     lead.contract = {
       sentAt: new Date().toISOString(),
-      templateId: tplId
+      templateId: tplId,
+      contractId: contractId,
+      docType: tpl.docType,
+      signUrl: signUrl
     };
     save();
     renderLeadsTable();

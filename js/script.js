@@ -1429,19 +1429,27 @@ function onVatStatusChange() {
 function inboxTargetUid() {
   return currentUid || 'A_TE_FIOK_AZONOSITOD';
 }
+// KÉT EmailJS-fiók (az ingyenes csomag fiókonként max 2 sablont enged):
+//  • Fiók A → a beágyazott űrlap visszaigazolói: megrendelő + tulaj
+//  • Fiók B → az appból küldött árajánlat + szerződés (offer* kulcsok)
 const EMAILJS_CFG = {
-  publicKey: 'VW5KUMRIxcbu5f_h9',
-  serviceId: 'service_zwzr5l9',
-  templateCustomer: 'template_rendli2550',
-  templateOwner: 'template_rendli2550',
-  templateOffer: 'template_OFFER_ID',
-  templateContract: 'template_CONTRACT_ID'
+  // Fiók A (beágyazott űrlap: megrendelő + tulaj)
+  publicKey: 'eTf1OffvvcrBwZcAm',
+  serviceId: 'service_598rmjv',
+  templateCustomer: 'template_megrendelo',
+  templateOwner: 'template_tulaj',
+  // Fiók B (app: árajánlat + szerződés)
+  offerPublicKey: 'VW5KUMRIxcbu5f_h9',
+  offerServiceId: 'service_zwzr5l9',
+  templateOffer: 'template_ajanlat',
+  templateContract: 'template_szerzodes'
 };
+// Az árajánlat/szerződés a Fiók B kulcsaival megy (offer*).
 function emailjsReady() {
   const c = EMAILJS_CFG;
   return (
-    !!(c && c.publicKey && c.serviceId) &&
-    [c.publicKey, c.serviceId].join('|').indexOf('EMAILJS_') < 0
+    !!(c && c.offerPublicKey && c.offerServiceId) &&
+    [c.offerPublicKey, c.offerServiceId].join('|').indexOf('EMAILJS_') < 0
   );
 }
 function emailjsSend(templateId, params) {
@@ -1453,9 +1461,9 @@ function emailjsSend(templateId, params) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      service_id: EMAILJS_CFG.serviceId,
+      service_id: EMAILJS_CFG.offerServiceId,
       template_id: templateId,
-      user_id: EMAILJS_CFG.publicKey,
+      user_id: EMAILJS_CFG.offerPublicKey,
       template_params: params
     })
   }).then((r) => {
@@ -1576,10 +1584,17 @@ function inboxEmbedSnippet() {
     if (telC) btns += '<a href="tel:' + telC + '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
     if (data.email) btns += '<a href="mailto:' + data.email + '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
     var ownerActions = btns ? '<div style="margin:0 0 4px 0">' + btns + '</div>' : "";
+    // Ügyfél-oldali gombok: az ügyfél a VÁLLALKOZÁST hívja/írja (biz telefon/e-mail).
+    var bizPhone = notify.bizPhone || "", bizEmail = notify.bizEmail || owner || "";
+    var telB = bizPhone ? String(bizPhone).replace(/[^\\d+]/g, "") : "";
+    var cbtns = "";
+    if (telB) cbtns += '<a href="tel:' + telB + '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
+    if (bizEmail) cbtns += '<a href="mailto:' + bizEmail + '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
+    var custActions = cbtns ? '<div style="margin:0 0 4px 0">' + cbtns + '</div>' : "";
     if (data.email) {
       sendMail(EMAILJS.templateCustomer, { to_email: data.email, to_name: data.name || "", from_name: biz || "Rendli",
-        brand_initial: initialOf(biz || "Rendli"), tagline: m.cTag, reply_to: owner || "",
-        subject: m.cSub + svc, heading: m.cHi, intro: m.cIn, details: rows, footer_note: m.cFoot, actions: "" });
+        brand_initial: initialOf(biz || "Rendli"), tagline: m.cTag, reply_to: bizEmail || owner || "",
+        subject: m.cSub + svc, heading: m.cHi, intro: m.cIn, details: rows, footer_note: m.cFoot, actions: custActions });
     }
     if (owner) {
       sendMail(EMAILJS.templateOwner, { to_email: owner, to_name: biz || "", from_name: "Rendli",
@@ -2059,7 +2074,9 @@ function publishFormConfig() {
           return '';
         }
       })(),
-      bizName: String((state.profile && state.profile.name) || '')
+      bizName: String((state.profile && state.profile.name) || ''),
+      bizEmail: String((state.sellerInfo && state.sellerInfo.email) || ''),
+      bizPhone: String((state.sellerInfo && state.sellerInfo.phone) || '')
     },
     updatedAt: Date.now()
   };

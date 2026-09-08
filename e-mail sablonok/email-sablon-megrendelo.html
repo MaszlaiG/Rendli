@@ -1,3 +1,12 @@
+<!--
+  RENDLI — ÜGYFÉL-VISSZAIGAZOLÓ E-MAIL (templateCustomer)
+  EmailJS template Content (Code / HTML). Settings fülön:
+    To Email = {{to_email}} · From Name = {{from_name}} · Reply To = {{reply_to}} · Subject = {{subject}}
+  A kód tölti a változókat: brand_initial, from_name, tagline, heading, intro,
+  {{{actions}}} (nyers HTML Hívás/Válasz gombok a vállalkozás elérhetőségeivel —
+  üresnél nem jelenik meg), {{{details}}} (nyers HTML-tábla, HÁROM kapcsos!), footer_note.
+  Akcentus: Rendli kék (#3b5bdb) + zöld visszaigazolás (#37b24d).
+-->
 <div style="margin: 0; padding: 0; background: #eef1f8">
   <table
     role="presentation"
@@ -26,8 +35,13 @@
             overflow: hidden;
           "
         >
+          <!-- Zöld visszaigazolás-akcentus (recipiens-megkülönböztető) -->
           <tr>
-            <td style="padding: 26px 34px 20px 34px; border-bottom: 1px solid #e4eaf5">
+            <td style="height: 4px; line-height: 4px; font-size: 0; background: #37b24d">&nbsp;</td>
+          </tr>
+
+          <tr>
+            <td style="padding: 24px 34px 20px 34px; border-bottom: 1px solid #e4eaf5">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="vertical-align: middle">
@@ -73,8 +87,29 @@
               </table>
             </td>
           </tr>
+
           <tr>
-            <td style="padding: 30px 34px 8px 34px">
+            <td style="padding: 28px 34px 8px 34px">
+              <!-- Zöld pipa-jelvény: vizuális visszaigazolás -->
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 0 16px 0">
+                <tr>
+                  <td
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      background: #eafaef;
+                      border-radius: 999px;
+                      color: #2b8a3e;
+                      font-size: 22px;
+                      font-weight: 800;
+                      text-align: center;
+                      line-height: 40px;
+                    "
+                  >
+                    &#10003;
+                  </td>
+                </tr>
+              </table>
               <h1
                 style="
                   margin: 0 0 12px 0;
@@ -88,40 +123,10 @@
                 {{heading}}
               </h1>
               <p style="margin: 0 0 18px 0; font-size: 14px; line-height: 1.65; color: #5d6b85">{{intro}}</p>
-              <div style="margin: 0 0 4px 0">
-                {{#if action_tel}}<a
-                  href="tel:{{action_tel}}"
-                  style="
-                    display: inline-block;
-                    background: #3b5bdb;
-                    color: #ffffff;
-                    font-weight: 700;
-                    font-size: 14px;
-                    padding: 12px 22px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    margin: 0 8px 8px 0;
-                  "
-                  >&#128222; Hívás</a
-                >{{/if}}{{#if action_mail}}<a
-                  href="mailto:{{action_mail}}"
-                  style="
-                    display: inline-block;
-                    background: #ffffff;
-                    color: #3b5bdb;
-                    font-weight: 700;
-                    font-size: 14px;
-                    padding: 10px 20px;
-                    border: 2px solid #3b5bdb;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    margin: 0 8px 8px 0;
-                  "
-                  >&#9993; Válasz e-mailben</a
-                >{{/if}}
-              </div>
+              {{{actions}}}
             </td>
           </tr>
+
           <tr>
             <td style="padding: 0 34px 8px 34px">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -129,6 +134,7 @@
               </table>
             </td>
           </tr>
+
           <tr>
             <td style="padding: 26px 34px 30px 34px">
               <div
@@ -142,11 +148,12 @@
                   line-height: 1.6;
                 "
               >
-                Válaszolj erre az e-mailre, és közvetlenül az ügyfélnek írsz — a levél az ő címére megy.
+                {{footer_note}}
               </div>
             </td>
           </tr>
         </table>
+
         <div
           style="
             max-width: 600px;
@@ -157,7 +164,7 @@
             font-family: -apple-system, &quot;Segoe UI&quot;, Arial, sans-serif;
           "
         >
-          Ezt az e-mailt a <strong style="color: #3b5bdb">Rend<span style="color: #3b5bdb">li</span></strong> küldte a
+          Ezt az e-mailt a <strong style="color: #3b5bdb">Rendli</strong> küldte a
           weboldalad megrendelő-űrlapja alapján.
         </div>
       </td>
