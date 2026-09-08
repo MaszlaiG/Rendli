@@ -728,6 +728,26 @@ async function sendOffer() {
   // Az "Elfogadom" gomb ugyanezt az oldalt nyitja, de elfogadás-szándékkal (a=1):
   // ott egy explicit kattintással írja be a megrendelő az elfogadást a Firestore-ba.
   const acceptUrl = pdfUrl ? pdfUrl + '&a=1' : '';
+  // A gombokat a KÓD építi kész HTML-ként (a sablon {{{actions}}}-ként szúrja be) —
+  // az EmailJS alapmotorja nem tudja a {{#if}} blokkokat, ezért itt oldjuk meg.
+  const qMail =
+    'mailto:' + ownerMail + '?subject=K%C3%A9rd%C3%A9sem%20van%20az%20%C3%A1raj%C3%A1nlatr%C3%B3l';
+  const acceptHref =
+    acceptUrl || 'mailto:' + ownerMail + '?subject=Elfogadom%20az%20%C3%A1raj%C3%A1nlatot';
+  let actions = '';
+  if (pdfUrl)
+    actions +=
+      '<a href="' +
+      pdfUrl +
+      '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128196; Letöltés PDF-ben</a>';
+  actions +=
+    '<a href="' +
+    acceptHref +
+    '" style="display:inline-block;background:#1e7a34;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#10003; Elfogadom az ajánlatot</a>';
+  actions +=
+    '<a href="' +
+    qMail +
+    '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">Kérdésem van</a>';
   const btn = document.getElementById('offer-send-btn');
   if (btn) btn.disabled = true;
   setNote('Küldés folyamatban…', false);
@@ -742,9 +762,7 @@ async function sendOffer() {
     heading: 'Árajánlatunk',
     intro: message,
     details: details,
-    action_mail: ownerMail,
-    pdf_url: pdfUrl,
-    accept_url: acceptUrl
+    actions: actions
   };
   try {
     await emailjsSend(EMAILJS_CFG.templateOffer, params);

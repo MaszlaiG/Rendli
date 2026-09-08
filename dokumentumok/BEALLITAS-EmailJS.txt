@@ -148,18 +148,11 @@ HIBAELHÁRÍTÁS
    A sablon változói (a kód tölti):
        {{from_name}} {{brand_initial}} {{tagline}} {{heading}} {{intro}}
        {{{details}}}    <- 3 kapcsos (tételek + összesítő + érvényesség)
-       {{action_mail}}  <- a "Kérdésem van" gomb címzettje (mailto)
-       {{accept_url}}   <- az "Elfogadom az ajánlatot" gomb linkje. Az ajanlat.html
-                           oldalra visz (a=1), ahol a megrendelő egy explicit
-                           kattintással AUTOMATIKUSAN elfogadottá teszi az ajánlatot:
-                           a Rendli fiókodban a megkeresés magától "Ajánlat elfogadva"
-                           állapotba kerül (Firestore inbox → élő figyelő). Nem kell
-                           kézzel jelölnöd. A {{#if accept_url}}…{{else}}…{{/if}} blokk
-                           üres URL-nél a régi mailto-ra esik vissza — NE töröld.
-       {{pdf_url}}      <- a "Letöltés PDF-ben" gomb linkje (ajanlat.html
-                           oldalra mutat, az ajánlat adata base64-ként a link
-                           # részében). A {{#if pdf_url}} blokk üres URL-nél
-                           elrejti a gombot — ezt a Code editorban NE töröld.
+       {{{actions}}}    <- 3 kapcsos: a kód által épített GOMBOK (Letöltés PDF-ben,
+                           Elfogadom az ajánlatot [auto-elfogadás], Kérdésem van).
+                           FONTOS: NINCS {{#if}} a sablonban — az EmailJS alapmotorja
+                           nem tudja a blokk-feltételeket ("corrupted variables" hiba),
+                           ezért a feltételes logika a KÓDBAN van, a sablon csak beszúrja.
 
    FONTOS a PDF-letöltéshez: az "ajanlat.html" oldalnak fent kell lennie a
    weboldal gyökerében (GitHub Pages), ugyanott, ahol az index.html. A kód
@@ -214,13 +207,12 @@ HIBAELHÁRÍTÁS
 
    Változók: {{from_name}} {{brand_initial}} {{tagline}} {{heading}}
              {{intro}} {{{details}}} (3 kapcsos! = a teljes szerződés)
-             {{sign_url}}    <- az "Aláírás és elfogadás" gomb linkje. A szerzodes.html
-                                oldalra visz, ahol a megrendelő RAJZOLT ALÁÍRÁSSAL + névvel
-                                aláírja; a fiókodban a megkeresés magától "Megrendelve"-re
-                                vált, és az aláírt példány (kézjeggyel) elmentődik. A
-                                {{#if sign_url}}…{{else}}…{{/if}} blokk üres URL-nél a régi
-                                mailto-ra esik vissza — NE töröld.
-             {{action_mail}} (a mailto-fallback címzettje)
+             {{{sign_button}}}  <- 3 kapcsos: a kód által épített "Aláírás és elfogadás"
+                                gomb (a szerzodes.html-re visz, ahol a megrendelő RAJZOLT
+                                ALÁÍRÁSSAL + névvel aláírja; a fiókodban a megkeresés magától
+                                "Megrendelve"-re vált, az aláírt példány elmentődik).
+                                NINCS {{#if}} a sablonban — az EmailJS nem tudja a blokk-
+                                feltételeket ("corrupted variables"), ezért a kód építi a gombot.
 
    FONTOS: az aláíráshoz a "szerzodes.html" oldalnak fent kell lennie a weboldal
    gyökerében (GitHub Pages), ÉS a frissített Firestore-szabályt fel kell tölteni

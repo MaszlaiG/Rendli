@@ -99,68 +99,7 @@
           </tr>
 
           <tr>
-            <td style="padding: 22px 34px 6px 34px">
-              {{#if pdf_url}}<a
-                href="{{pdf_url}}"
-                style="
-                  display: inline-block;
-                  background: #3b5bdb;
-                  color: #ffffff;
-                  font-weight: 700;
-                  font-size: 14px;
-                  padding: 12px 22px;
-                  border-radius: 10px;
-                  text-decoration: none;
-                  margin: 0 8px 8px 0;
-                "
-                >&#128196; Letöltés PDF-ben</a
-              >{{/if}}
-              {{#if accept_url}}<a
-                href="{{accept_url}}"
-                style="
-                  display: inline-block;
-                  background: #1e7a34;
-                  color: #ffffff;
-                  font-weight: 700;
-                  font-size: 14px;
-                  padding: 12px 22px;
-                  border-radius: 10px;
-                  text-decoration: none;
-                  margin: 0 8px 8px 0;
-                "
-                >&#10003; Elfogadom az ajánlatot</a
-              >{{else}}<a
-                href="mailto:{{action_mail}}?subject=Elfogadom%20az%20%C3%A1raj%C3%A1nlatot"
-                style="
-                  display: inline-block;
-                  background: #1e7a34;
-                  color: #ffffff;
-                  font-weight: 700;
-                  font-size: 14px;
-                  padding: 12px 22px;
-                  border-radius: 10px;
-                  text-decoration: none;
-                  margin: 0 8px 8px 0;
-                "
-                >&#10003; Elfogadom az ajánlatot</a
-              >{{/if}}
-              <a
-                href="mailto:{{action_mail}}?subject=K%C3%A9rd%C3%A9sem%20van%20az%20%C3%A1raj%C3%A1nlatr%C3%B3l"
-                style="
-                  display: inline-block;
-                  background: #ffffff;
-                  color: #3b5bdb;
-                  font-weight: 700;
-                  font-size: 14px;
-                  padding: 10px 20px;
-                  border: 2px solid #3b5bdb;
-                  border-radius: 10px;
-                  text-decoration: none;
-                  margin: 0 8px 8px 0;
-                "
-                >Kérdésem van</a
-              >
-            </td>
+            <td style="padding: 22px 34px 6px 34px">{{{actions}}}</td>
           </tr>
 
           <tr>

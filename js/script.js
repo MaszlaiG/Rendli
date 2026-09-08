@@ -1515,6 +1515,28 @@ function inboxEmbedSnippet() {
           svc:"Service", price:"Price", date:"Date", nm:"Name", em:"Email", ph:"Phone", msg:"Message", deadline:"Deadline", budget:"Budget", ctype:"Client type", comp:"Company", tax:"VAT number", mo:"/ mo" }
   };
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function rendliNotify(msg) {
+    var ov = document.createElement("div");
+    ov.setAttribute("role", "dialog");
+    ov.style.cssText = "position:fixed;inset:0;background:rgba(20,18,15,.45);display:flex;align-items:center;justify-content:center;z-index:2147483000;padding:20px;";
+    var card = document.createElement("div");
+    card.style.cssText = "background:var(--card,var(--paper,#ffffff));color:var(--ink,#1a1a1a);border:1px solid var(--line,#e2ddd2);border-radius:16px;max-width:420px;width:100%;padding:26px 26px 20px;box-shadow:0 18px 50px rgba(20,18,15,.28);text-align:center;font-family:inherit;";
+    var msgEl = document.createElement("div");
+    msgEl.textContent = msg;
+    msgEl.style.cssText = "font-size:18px;font-weight:700;line-height:1.35;margin-bottom:18px;";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = (LANG === "en" ? "Close" : "Bezárás");
+    btn.style.cssText = "background:var(--ink,#1a1a1a);color:var(--paper,#ffffff);border:none;border-radius:999px;padding:11px 26px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;";
+    function close() { if (ov.parentNode) ov.parentNode.removeChild(ov); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape" || e.keyCode === 27) close(); }
+    btn.onclick = close;
+    ov.addEventListener("click", function (e) { if (e.target === ov) close(); });
+    document.addEventListener("keydown", onKey);
+    card.appendChild(msgEl); card.appendChild(btn);
+    ov.appendChild(card); document.body.appendChild(ov);
+    try { btn.focus(); } catch (e) {}
+  }
   function ft(n, lang) { n = Math.round(Number(n) || 0); return lang === "en" ? "€" + n.toLocaleString("hu-HU") : n.toLocaleString("hu-HU") + " Ft"; }
   function priceFor(s, lang) {
     if (lang === "en") {
@@ -1652,7 +1674,7 @@ function inboxEmbedSnippet() {
       var rawMsg = g("message"), ctV = "", coV = "", taxV = "";
       if (fc.business) {
         ctV = g("clientType") || t.priv;
-        if (ctV === t.biz && !g("companyName")) { alert(t.needCo); return; }
+        if (ctV === t.biz && !g("companyName")) { rendliNotify(t.needCo); return; }
         coV = g("companyName"); taxV = g("taxNumber");
       }
       var msg = rawMsg;
@@ -1669,9 +1691,9 @@ function inboxEmbedSnippet() {
       db.addInbox(data)
         .then(function () {
           try { sendConfirmations(data, { locName: locName, phone: phoneV, budget: budgetV, deadline: deadlineV, clientType: (fc.business ? ctV : ""), company: coV, tax: taxV, message: rawMsg, period: per }); } catch (e) {}
-          form.reset(); alert(t.thanks);
+          form.reset(); rendliNotify(t.thanks);
         })
-        .catch(function (err) { console.error(err); alert(t.err); });
+        .catch(function (err) { console.error(err); rendliNotify(t.err); });
     });
   }
   window.rendliSetLang = function (l) { if (l === "hu" || l === "en") { LANG = l; build(); } };

@@ -1325,6 +1325,18 @@ async function sendContract() {
     console.warn('[Rendli] szerződés közzététel:', e);
     signUrl = '';
   }
+  // A gombot a KÓD építi kész HTML-ként (a sablon {{{sign_button}}}-ként szúrja be) —
+  // az EmailJS alapmotorja nem tudja a {{#if}} blokkokat.
+  const signHref =
+    signUrl ||
+    'mailto:' + ownerMail + '?subject=Elfogadom%20a%20megb%C3%ADz%C3%A1si%20szerz%C5%91d%C3%A9st';
+  const signLabel = signUrl ? '&#9997; Aláírás és elfogadás' : '&#10003; Elfogadom a szerződést';
+  const signButton =
+    '<a href="' +
+    signHref +
+    '" style="display:inline-block;background:#1e7a34;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:2px 8px 10px 0">' +
+    signLabel +
+    '</a>';
   const params = {
     to_email: lead.email,
     to_name: lead.name || '',
@@ -1338,8 +1350,7 @@ async function sendContract() {
       ? 'Köszönjük, hogy elfogadtad az árajánlatot! Mellékeljük a szerződést. Kérjük, olvasd át, majd az „Aláírás és elfogadás" gombbal írd alá online.'
       : 'Köszönjük, hogy elfogadtad az árajánlatot! Mellékeljük a szerződést. Kérjük, olvasd át; kérdés vagy elfogadás esetén válaszolj erre az e-mailre.',
     details: details,
-    action_mail: ownerMail,
-    sign_url: signUrl
+    sign_button: signButton
   };
   try {
     await emailjsSend(EMAILJS_CFG.templateContract, params);
