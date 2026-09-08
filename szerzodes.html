@@ -179,6 +179,9 @@
     // Az aláírás a szerződésben a Megrendelő aláírásvonala FÖLÉ kerül (a slotba).
     var slot=document.querySelector('.rendli-sig-client');
     if(slot) slot.innerHTML='<img src="'+png+'" alt="aláírás" style="max-height:58px;max-width:92%">';
+    // Audit-sor a Kelt alá.
+    var stamp=document.querySelector('.rendli-sign-stamp');
+    if(stamp) stamp.innerHTML='<p style="margin-top:8px;font-size:11px;color:#777">Elektronikusan aláírta: <strong>'+esc(name)+'</strong> · '+esc(when)+'</p>';
     document.getElementById('signed-slot').innerHTML =
       '<div class="signwrap"><div class="signed-box">'+
         '<p class="ok">✓ Aláírva — köszönjük!</p>'+

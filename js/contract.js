@@ -245,16 +245,19 @@ function _closingBody() {
   );
 }
 
+// Város kinyerése a címből ("1052 Budapest, Példa u. 1." → "Budapest").
+function _cityOf(addr) {
+  addr = (addr || '').trim();
+  const m = addr.match(/\d{4}\s+([^,]+)/);
+  if (m) return m[1].trim();
+  const first = addr.split(',')[0].trim();
+  return first;
+}
 function _signaturesBlock(ctx, roles) {
+  const hely = _cityOf(ctx.m.cim) || '[hely]';
   return (
     '<div style="display:flex;justify-content:space-between;gap:40px;margin-top:44px">' +
-    '<div style="flex:1;text-align:center">' +
-    '<div class="rendli-sig-client" style="height:64px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden"></div>' +
-    '<div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
-    roles.client +
-    '<br><strong>' +
-    escHtml(ctx.o.nev) +
-    '</strong></div></div>' +
+    // BAL oldal: Vállalkozó (tulaj) — nincs rárajzolt kézjegy, csak térköz az igazításhoz
     '<div style="flex:1;text-align:center">' +
     '<div style="height:64px"></div>' +
     '<div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
@@ -262,12 +265,21 @@ function _signaturesBlock(ctx, roles) {
     '<br><strong>' +
     escHtml(ctx.m.nev) +
     '</strong></div></div>' +
+    // JOBB oldal: Megrendelő (ügyfél) — ide kerül a rárajzolt aláírás a vonal fölé
+    '<div style="flex:1;text-align:center">' +
+    '<div class="rendli-sig-client" style="height:64px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden"></div>' +
+    '<div style="border-top:1px solid #333;padding-top:6px;font-size:12px">' +
+    roles.client +
+    '<br><strong>' +
+    escHtml(ctx.o.nev) +
+    '</strong></div></div>' +
     '</div>' +
     '<p style="margin-top:18px;font-size:12px;color:#555">Kelt: ' +
-    (_optval((ctx.def || {}).teljHely) ? escHtml(_optval(ctx.def.teljHely)) : '[hely]') +
+    escHtml(hely) +
     ', ' +
     escHtml(ctx.kelt) +
-    '.</p>'
+    '.</p>' +
+    '<div class="rendli-sign-stamp"></div>'
   );
 }
 
@@ -1114,7 +1126,8 @@ function onContractTemplateChange() {
   note.textContent = 'Jogi típus: ' + typeLbl + ' — ' + tpl.subtitle + '.';
 }
 
-function buildContractInner(ctx, tplId) {
+function buildContractInner(ctx, tplId, opts) {
+  const forClient = !!(opts && opts.forClient);
   const tpl = _getTemplate(tplId || 'web');
   const roles = _roles(tpl);
   ctx.def = _getContractSettings(tpl.id);
@@ -1135,14 +1148,14 @@ function buildContractInner(ctx, tplId) {
     .join('');
   const introHtml = _optval(d.intro) ? _P('<strong>Kiegészítő rendelkezés:</strong> ' + escHtml(_optval(d.intro))) : '';
   return (
-    _disclaimer() +
+    (forClient ? '' : _disclaimer()) +
     _titleBlock(tpl) +
     _partiesBlock(ctx, roles, tpl) +
     introHtml +
     secHtml +
     _signaturesBlock(ctx, roles) +
     (tpl.appendices ? tpl.appendices(ctx) : '') +
-    _reminderNote()
+    (forClient ? '' : _reminderNote())
   );
 }
 
@@ -1231,13 +1244,17 @@ function viewSignedContract(leadId) {
         const slot = '<div class="rendli-sig-client" style="height:64px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden">';
         if (html.indexOf(slot) >= 0) html = html.replace(slot, slot + img);
         else html += '<div style="margin-top:24px;text-align:center"><div style="border-top:1px solid #333;display:inline-block;padding-top:6px">' + img + '</div></div>';
-        // Szöveges audit-sor a lap alján
-        html +=
-          '<p style="margin-top:22px;font-size:11px;color:#777">Elektronikusan aláírta: <strong>' +
+        // Szöveges audit-sor a Kelt alá (a stamp-helyre); ha nincs, a lap aljára.
+        const stamp =
+          '<p style="margin-top:8px;font-size:11px;color:#777">Elektronikusan aláírta: <strong>' +
           escHtml(d.signerName || lead.contract.signerName || '') +
           '</strong> &middot; ' +
           escHtml(when) +
           '</p>';
+        const stampSlot = '<div class="rendli-sign-stamp"></div>';
+        if (html.indexOf(stampSlot) >= 0)
+          html = html.replace(stampSlot, '<div class="rendli-sign-stamp">' + stamp + '</div>');
+        else html += stamp;
       }
       const docEl = win.document.getElementById('doc');
       if (docEl) docEl.innerHTML = html;
@@ -1305,7 +1322,7 @@ async function sendContract() {
   const si = state.sellerInfo || {};
   const bizName = si.name || 'Rendli';
   const ownerMail = si.email || (LocalStore.currentUser && LocalStore.currentUser.email) || '';
-  const details = buildContractInner(ctx, tplId);
+  const details = buildContractInner(ctx, tplId, { forClient: true });
   const btn = document.getElementById('contract-send-btn');
   if (btn) btn.disabled = true;
   setNote('Küldés folyamatban…', false);
