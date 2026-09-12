@@ -1429,22 +1429,16 @@ function onVatStatusChange() {
 function inboxTargetUid() {
   return currentUid || 'A_TE_FIOK_AZONOSITOD';
 }
-// KÉT EmailJS-fiók (az ingyenes csomag fiókonként max 2 sablont enged):
-//  • Fiók A → a beágyazott űrlap visszaigazolói: megrendelő + tulaj
-//  • Fiók B → az appból küldött árajánlat + szerződés (offer* kulcsok)
 const EMAILJS_CFG = {
-  // Fiók A (beágyazott űrlap: megrendelő + tulaj)
   publicKey: 'eTf1OffvvcrBwZcAm',
   serviceId: 'service_598rmjv',
   templateCustomer: 'template_megrendelo',
   templateOwner: 'template_tulaj',
-  // Fiók B (app: árajánlat + szerződés)
   offerPublicKey: 'VW5KUMRIxcbu5f_h9',
   offerServiceId: 'service_zwzr5l9',
   templateOffer: 'template_ajanlat',
   templateContract: 'template_szerzodes'
 };
-// Az árajánlat/szerződés a Fiók B kulcsaival megy (offer*).
 function emailjsReady() {
   const c = EMAILJS_CFG;
   return (

@@ -137,7 +137,6 @@
     document.getElementById('bar').hidden = false;
   }
 
-  // Ugyanaz a projekt-konfig, mint az appban / a beágyazott űrlapban (publikus adat).
   var FB = { apiKey:"AIzaSyD8Ps4RDjEnN4X-NTdQsoiBp6d-_gR-P5A", authDomain:"rendli-202608.firebaseapp.com", projectId:"rendli-202608", storageBucket:"rendli-202608.firebasestorage.app", messagingSenderId:"638877114951", appId:"1:638877114951:web:24396e83b719f604b04762" };
 
   function toast(msg){
@@ -146,18 +145,15 @@
   }
 
   function setupAccept(o){
-    if(!(o.uid && o.leadId)) return;   // régi / hiányos link → nincs elfogadás-gomb
+    if(!(o.uid && o.leadId)) return;
     var btn=document.getElementById('accept-btn');
     btn.hidden=false;
-    // Ha az e-mail "Elfogadom" gombjából jött (a=1), emeljük ki a gombot (NEM fogad el magától).
     if(/[#&]a=1(?:&|$)/.test(location.hash)){
       btn.classList.add('pulse');
       try { btn.scrollIntoView({ block:'nearest' }); } catch(e){}
     }
   }
 
-  // Elfogadás CSAK explicit kattintásra (soha nem oldal-betöltéskor) — így az e-mail
-  // linkelőnéző/szkennelő botok nem tudják véletlenül elfogadottá tenni.
   function acceptOffer(){
     var o=OFFER, btn=document.getElementById('accept-btn');
     if(!o || !o.uid || !o.leadId || (btn && btn.dataset.done)) return;
