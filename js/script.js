@@ -469,8 +469,8 @@ const I18N_HU_EN = {
   'Interface language: English': 'Interface language: English',
   'Állítsd be a saját rendelő-űrlapodat: a szolgáltatásaidat (árral), a mezőket, a vállalkozó opciót. Alul a beállításaid alapján frissül a beillesztendő kód — másold a weboldaladra. Ha módosítasz, mentsd, majd másold ki újra.':
     'Set up your own order form: your services (with prices), the fields, the company option. The embed code below updates from your settings — copy it to your website. If you change something, save, then copy it again.',
-  'A szolgáltatások legördülőként jelennek meg az űrlapon. Add meg a magyar és (ha szeretnéd) az angol nevet, valamint az árat forintban és euróban — angol nyelvű oldalon az angol név és az euró ár jelenik meg. Az euró mező üresen hagyható: ekkor a rendszer az aktuális árfolyammal átszámol. A megadott ár a beérkező megrendelésbe is bekerül (a Rendliben módosítható).':
-    'Services appear as a dropdown on the form. Provide the Hungarian and (optionally) the English name, plus the price in HUF and EUR — on an English page the English name and EUR price are shown. The EUR field can be left empty: the system then converts using the current exchange rate. The price is also included in the incoming order (editable in Rendli).',
+  'A szolgáltatások legördülőként jelennek meg az űrlapon. Add meg a magyar és (ha szeretnéd) az angol nevet, valamint az árat forintban és euróban — angol nyelvű oldalon az angol név és az euró ár jelenik meg. Az euró mező üresen hagyható: ekkor a rendszer az aktuális árfolyammal átszámol. A megadott ár a beérkező megrendelésbe is bekerül (a Kvitliben módosítható).':
+    'Services appear as a dropdown on the form. Provide the Hungarian and (optionally) the English name, plus the price in HUF and EUR — on an English page the English name and EUR price are shown. The EUR field can be left empty: the system then converts using the current exchange rate. The price is also included in the incoming order (editable in Kvitli).',
   'Az űrlap nyelve és pénzneme automatikusan a weboldal nyelvét követi: magyar oldalon':
     'The form language and currency automatically follow the website language: on a Hungarian page',
   'magyar szöveg + Ft': 'Hungarian text + HUF',
@@ -788,7 +788,7 @@ function save() {
   if (!_stateLoaded) {
     setSaveStatus('Mentés letiltva — az adatok nem töltődtek be', 'sync-err');
     console.warn(
-      '[Rendli] save() blokkolva: a state nem töltődött be sikeresen (a felhő felülírásának megelőzése).'
+      '[Kvitli] save() blokkolva: a state nem töltődött be sikeresen (a felhő felülírásának megelőzése).'
     );
     return;
   }
@@ -801,7 +801,7 @@ function save() {
     flashSaved();
   } catch (e) {
     setSaveStatus('Mentés sikertelen', 'sync-err');
-    console.error('[Rendli] Mentési hiba:', e);
+    console.error('[Kvitli] Mentési hiba:', e);
   }
 }
 let _saveTimer = null;
@@ -987,7 +987,7 @@ function showLoadError(err) {
       '<h2 style="margin:0 0 8px;font-size:18px">Nem sikerült betölteni az adatokat</h2>' +
       '<p style="margin:0 0 6px;font-size:13px;color:var(--muted,#999);line-height:1.5">A felhőből most nem tudtuk beolvasni a fiókod adatait (valószínűleg gyenge vagy megszakadt internetkapcsolat).</p>' +
       '<p style="margin:0 0 18px;font-size:13px;color:var(--muted,#999);line-height:1.5"><strong>A meglévő adataid biztonságban vannak</strong> — a mentés le van tiltva, amíg a betöltés nem sikerül, így semmi nem íródik felül.</p>' +
-      '<button type="button" onclick="location.reload()" style="cursor:pointer;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;background:var(--accent,#2f63e6);color:#fff">Újratöltés</button>' +
+      '<button type="button" onclick="location.reload()" style="cursor:pointer;border:none;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;background:var(--accent,#2378be);color:#fff">Újratöltés</button>' +
       '<div class="le-code" style="margin-top:14px;font-size:11px;color:var(--muted,#777);word-break:break-word"></div>' +
       '</div>';
     document.body.appendChild(box);
@@ -1014,7 +1014,7 @@ function ensureInboxKey() {
   try {
     LocalStore.saveVault(state);
   } catch (e) {
-    console.warn('[Rendli] kulcs mentése:', e);
+    console.warn('[Kvitli] kulcs mentése:', e);
   }
 }
 function openDataModal() {
@@ -1115,7 +1115,7 @@ function exportData() {
     uiAlert('A mentés exportálása nem sikerült.', {
       title: 'Hiba'
     });
-    console.error('[Rendli] export error:', e);
+    console.error('[Kvitli] export error:', e);
   }
 }
 function importData(input) {
@@ -1134,7 +1134,7 @@ function importData(input) {
       return;
     }
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      uiAlert('Ez nem egy érvényes Rendli mentésfájl.', {
+      uiAlert('Ez nem egy érvényes Kvitli mentésfájl.', {
         title: 'Hiba'
       });
       input.value = '';
@@ -1190,7 +1190,7 @@ async function resetAllData() {
   try {
     await LocalStore.saveVault(state);
   } catch (e) {
-    console.error('[Rendli] reset error:', e);
+    console.error('[Kvitli] reset error:', e);
   }
   location.reload();
 }
@@ -1471,8 +1471,8 @@ function emailjsSend(templateId, params) {
 function inboxEmbedSnippet() {
   const uid = inboxTargetUid();
   const key = (state && state.inboxKey) || '';
-  return `<!-- Rendli rendelő-űrlap (dinamikus, a weboldal nyelvét követi — elég EGYSZER beilleszteni) -->
-<!-- A beérkező rendelés a Rendli felhő-adatbázisába (Firestore) kerül, és azonnal megjelenik a Rendli-fiókodban. -->
+  return `<!-- Kvitli rendelő-űrlap (dinamikus, a weboldal nyelvét követi — elég EGYSZER beilleszteni) -->
+<!-- A beérkező rendelés a Kvitli felhő-adatbázisába (Firestore) kerül, és azonnal megjelenik a Kvitli-fiókodban. -->
 <div id="rendli-order-mount"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"><\/script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"><\/script>
@@ -1572,13 +1572,13 @@ function inboxEmbedSnippet() {
   function erowMail(label, val) {
     if (val == null || String(val) === "") return "";
     return '<tr><td style="padding:10px 0;border-bottom:1px solid #e4eaf5;font-size:12px;color:#5d6b85;vertical-align:top;white-space:nowrap">' + esc(label) +
-           '</td><td style="padding:10px 0 10px 18px;border-bottom:1px solid #e4eaf5;font-size:14px;vertical-align:top;text-align:right"><a href="mailto:' + esc(val) + '" style="color:#3b5bdb;font-weight:700;text-decoration:none">' + esc(val) + '</a></td></tr>';
+           '</td><td style="padding:10px 0 10px 18px;border-bottom:1px solid #e4eaf5;font-size:14px;vertical-align:top;text-align:right"><a href="mailto:' + esc(val) + '" style="color:#2378be;font-weight:700;text-decoration:none">' + esc(val) + '</a></td></tr>';
   }
   function erowPhone(label, val) {
     if (val == null || String(val) === "") return "";
     var tel = String(val).replace(/[^\\d+]/g, "");
     return '<tr><td style="padding:10px 0;border-bottom:1px solid #e4eaf5;font-size:12px;color:#5d6b85;vertical-align:top;white-space:nowrap">' + esc(label) +
-           '</td><td style="padding:8px 0 8px 18px;border-bottom:1px solid #e4eaf5;vertical-align:middle;text-align:right"><a href="tel:' + esc(tel) + '" style="display:inline-block;background:#e9edfb;color:#3b5bdb;font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:999px;text-decoration:none;white-space:nowrap">&#128222; ' + esc(val) + '</a></td></tr>';
+           '</td><td style="padding:8px 0 8px 18px;border-bottom:1px solid #e4eaf5;vertical-align:middle;text-align:right"><a href="tel:' + esc(tel) + '" style="display:inline-block;background:#e9edfb;color:#2378be;font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:999px;text-decoration:none;white-space:nowrap">&#128222; ' + esc(val) + '</a></td></tr>';
   }
   function sendConfirmations(data, x) {
     if (!emailReady()) return;
@@ -1597,23 +1597,23 @@ function inboxEmbedSnippet() {
     var telC = x.phone ? String(x.phone).replace(/[^\\d+]/g, "") : "";
     var callLbl = LANG === "en" ? "Call" : "Hívás", replyLbl = LANG === "en" ? "Reply by email" : "Válasz e-mailben";
     var btns = "";
-    if (telC) btns += '<a href="tel:' + telC + '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
-    if (data.email) btns += '<a href="mailto:' + data.email + '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
+    if (telC) btns += '<a href="tel:' + telC + '" style="display:inline-block;background:#2378be;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
+    if (data.email) btns += '<a href="mailto:' + data.email + '" style="display:inline-block;background:#ffffff;color:#2378be;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #2378be;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
     var ownerActions = btns ? '<div style="margin:0 0 4px 0">' + btns + '</div>' : "";
     // Ügyfél-oldali gombok: az ügyfél a VÁLLALKOZÁST hívja/írja (biz telefon/e-mail).
     var bizPhone = notify.bizPhone || "", bizEmail = notify.bizEmail || owner || "";
     var telB = bizPhone ? String(bizPhone).replace(/[^\\d+]/g, "") : "";
     var cbtns = "";
-    if (telB) cbtns += '<a href="tel:' + telB + '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
-    if (bizEmail) cbtns += '<a href="mailto:' + bizEmail + '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
+    if (telB) cbtns += '<a href="tel:' + telB + '" style="display:inline-block;background:#2378be;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128222; ' + callLbl + '</a>';
+    if (bizEmail) cbtns += '<a href="mailto:' + bizEmail + '" style="display:inline-block;background:#ffffff;color:#2378be;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #2378be;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#9993; ' + replyLbl + '</a>';
     var custActions = cbtns ? '<div style="margin:0 0 4px 0">' + cbtns + '</div>' : "";
     if (data.email) {
-      sendMail(EMAILJS.templateCustomer, { to_email: data.email, to_name: data.name || "", from_name: biz || "Rendli",
-        brand_initial: initialOf(biz || "Rendli"), tagline: m.cTag, reply_to: bizEmail || owner || "",
+      sendMail(EMAILJS.templateCustomer, { to_email: data.email, to_name: data.name || "", from_name: biz || "Kvitli",
+        brand_initial: initialOf(biz || "Kvitli"), tagline: m.cTag, reply_to: bizEmail || owner || "",
         subject: m.cSub + svc, heading: m.cHi, intro: m.cIn, details: rows, footer_note: m.cFoot, actions: custActions });
     }
     if (owner) {
-      sendMail(EMAILJS.templateOwner, { to_email: owner, to_name: biz || "", from_name: "Rendli",
+      sendMail(EMAILJS.templateOwner, { to_email: owner, to_name: biz || "", from_name: "Kvitli",
         brand_initial: "R", tagline: m.oTag, reply_to: data.email || "",
         subject: m.oSub + svc, heading: m.oHi, intro: m.oIn, details: rows, footer_note: m.oFoot, actions: ownerActions });
     }
@@ -1704,7 +1704,7 @@ function inboxEmbedSnippet() {
 }
 function priceListSnippet() {
   const uid = inboxTargetUid() || 'OWNER_UID';
-  return `<!-- Rendli árlista — élőben a Rendli beállításaidból. Elég EGYSZER beilleszteni; ha módosítasz és mentesz, magától frissül. -->
+  return `<!-- Kvitli árlista — élőben a Kvitli beállításaidból. Elég EGYSZER beilleszteni; ha módosítasz és mentesz, magától frissül. -->
 <div id="rendli-prices"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"><\/script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"><\/script>
@@ -2099,7 +2099,7 @@ function publishFormConfig() {
   try {
     LocalStore.kvSet('formcfg_' + currentUid, pub);
   } catch (e) {
-    console.warn('[Rendli] form_config közzététel:', e);
+    console.warn('[Kvitli] form_config közzététel:', e);
   }
 }
 function copyFormSnippet() {
@@ -2483,15 +2483,15 @@ const EXPENSE_CAT_BADGE = {
   Egyéb: 'badge-gray'
 };
 const EXPENSE_CAT_COLORS = [
-  '#2456d6',
+  '#1e6bae',
+  '#2f8fbf',
   '#0e7490',
-  '#b45309',
-  '#6d4fc4',
-  '#178746',
-  '#d23b3b',
-  '#0d9488',
-  '#be185d',
-  '#66748a'
+  '#14a3a0',
+  '#2aa17a',
+  '#4fae5a',
+  '#7cb342',
+  '#9ac64f',
+  '#5a7f95'
 ];
 function addExpense() {
   const date = document.getElementById('ex-date').value;
@@ -3475,12 +3475,12 @@ function invDownloadPDF(id) {
   .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:38px}
   .brand{display:flex;align-items:center;gap:11px}
   .brand .tile{width:34px;height:34px;flex:0 0 34px}
-  .logo{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#171c28}.logo span{color:#3b5bdb}
+  .logo{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#171c28}.logo span{color:#2378be}
   .inv-meta{text-align:right}
   .inv-meta h1{font-family:'Inter',sans-serif;font-size:32px;font-weight:800;letter-spacing:-0.03em;color:#171c28}
   .inv-meta .num{font-size:12.5px;color:#5d6b85;font-weight:500;margin-top:2px;letter-spacing:.3px}
   .parties{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-bottom:30px}
-  .party{border-top:2px solid #3b5bdb;padding-top:12px}
+  .party{border-top:2px solid #2378be;padding-top:12px}
   .plabel{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#5d6b85;margin-bottom:8px}
   .pname{font-size:15px;font-weight:700;margin-bottom:3px}
   .pinfo{font-size:12px;color:#5d6b85;line-height:1.65}
@@ -3494,14 +3494,14 @@ function invDownloadPDF(id) {
   .totals .box{min-width:320px}
   .trow{display:flex;justify-content:space-between;padding:7px 2px;font-size:13px;color:#3a4257}
   .trow.sep{border-top:1px solid #dbe2f0}
-  .tfinal{display:flex;justify-content:space-between;align-items:center;margin-top:10px;background:#3b5bdb;color:#fff;padding:14px 18px;border-radius:8px}
+  .tfinal{display:flex;justify-content:space-between;align-items:center;margin-top:10px;background:#2378be;color:#fff;padding:14px 18px;border-radius:8px}
   .tfinal .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.92}
   .tfinal .amt{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.02em}
   .aam{margin-top:10px;text-align:right;font-size:11.5px;color:#5d6b85;font-style:italic}
   .pay{text-align:right;margin-top:16px;font-size:12px;color:#3a4257}
-  .note{border-left:3px solid #3b5bdb;background:#eef1f8;border-radius:0 8px 8px 0;padding:11px 15px;font-size:12px;color:#2b3550;margin-top:22px}
+  .note{border-left:3px solid #2378be;background:#eef1f8;border-radius:0 8px 8px 0;padding:11px 15px;font-size:12px;color:#2b3550;margin-top:22px}
   .footer{border-top:1px solid #dbe2f0;margin-top:30px;padding-top:14px;font-size:11px;color:#5d6b85;text-align:center}
-  .print-btn{margin-top:16px;background:#3b5bdb;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+  .print-btn{margin-top:16px;background:#2378be;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
   @page{margin:0}
   @media print{.print-btn{display:none}body{background:#fff;padding:0;margin:0}.sheet{border:none;border-radius:0;padding:40px 44px;max-width:none}}
 </style></head><body>
@@ -3509,13 +3509,13 @@ function invDownloadPDF(id) {
   <div class="top">
     <div class="brand">
       <svg class="tile" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-        <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b5bdb"/><stop offset="1" stop-color="#2e49b8"/></linearGradient></defs>
+        <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2378be"/><stop offset="1" stop-color="#1e6bae"/></linearGradient></defs>
         <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
         <rect x="16" y="20" width="32" height="6" rx="3" fill="#ffffff"/>
         <rect x="16" y="30" width="24" height="6" rx="3" fill="#ffffff" opacity="0.82"/>
-        <rect x="16" y="40" width="14" height="6" rx="3" fill="#2e9e6b"/>
+        <rect x="16" y="40" width="14" height="6" rx="3" fill="#7cb342"/>
       </svg>
-      <div class="logo">Rend<span>li</span></div>
+      <div class="logo">Kvit<span>li</span></div>
     </div>
     <div class="inv-meta"><h1>Számla</h1><div class="num">${esc(inv.invoiceNum)}</div></div>
   </div>

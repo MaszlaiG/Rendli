@@ -23,7 +23,7 @@
         try {
           cb(userObj(u));
         } catch (e) {
-          console.error('[Rendli] auth listener hiba:', e);
+          console.error('[Kvitli] auth listener hiba:', e);
         }
       });
     },
@@ -96,7 +96,7 @@
         .doc(u.uid)
         .set(clean)
         .catch(function (e) {
-          console.error('[Rendli] mentés hiba:', e);
+          console.error('[Kvitli] mentés hiba:', e);
         });
     },
     kvGet: function (key, def) {
@@ -116,7 +116,7 @@
           .doc(u.uid)
           .set(clean)
           .catch(function (e) {
-            console.warn('[Rendli] form_config közzététel:', e);
+            console.warn('[Kvitli] form_config közzététel:', e);
           });
       }
     },

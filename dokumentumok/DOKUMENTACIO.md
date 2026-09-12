@@ -1,4 +1,4 @@
-# Rendli — Műszaki dokumentáció
+# Kvitli — Műszaki dokumentáció
 
 Fiók-alapú vállalkozáskezelő webalkalmazás szabadúszóknak: megkeresések → ajánlat → szerződés → megrendelés → projekt → számla, plusz bevétel/kiadás, valamint egy beágyazható megrendelő-űrlap. Adattárolás felhőben (Firebase). Nincs build lépés, nincs keretrendszer.
 
@@ -25,7 +25,7 @@ A teljes UI **kétnyelvű (HU/EN)**, a megjelenés **világos / sötét / auto**
 ## 2. Fájlszerkezet és betöltési sorrend
 
 ```
-04_Rendli/
+04_Kvitli/
 ├── index.html            # teljes DOM: auth-kapu, oldalsáv, fülek, ablakok (modálok)
 ├── ajanlat.html          # önálló, publikus árajánlat-nézet a megrendelőnek (a link # részéből dekódol, "Mentés PDF-ként" + "Elfogadom" gomb – utóbbi a Firestore inboxba írja az elfogadást, amit a fiók élőben "Ajánlat elfogadva"-ra állít)
 ├── szerzodes.html        # önálló, publikus szerződés-aláíró oldal (a szerződést a Firestore contracts/<uid>/docs/<token> dokumentumból tölti, RAJZOLT aláírás + név → inboxba, a fiók "Megrendelve"-re vált és elmenti az aláírt példányt)
@@ -84,7 +84,7 @@ A modulok **nem ES-modulok**: minden IIFE-be vagy a globális névtérbe kerül,
 
 ### 3.4 Kétnyelvűség (i18n)
 
-A Rendli **futásidejű DOM-fordítással** dolgozik (nem sablon-kulcsokkal):
+A Kvitli **futásidejű DOM-fordítással** dolgozik (nem sablon-kulcsokkal):
 - alap a magyar DOM; `translateToEn(root)` / `restoreHu(root)` bejárja a szövegcsomópontokat (`_i18nWalk`) és egy szótár szerint cseréli őket;
 - `startI18nObserver()` egy `MutationObserver`-rel a később renderelt tartalmat is lefordítja;
 - `setUiLang(lang)` állítja a `state.uiLang`-ot; `L(hu, en)` és `isEn()` a JS-ből generált szövegekhez ad nyelvfüggő stringet; `locDate()` a lokalizált dátumhoz.
@@ -181,7 +181,7 @@ A `defaultState()` által adott főbb kulcsok:
 ### Beágyazott űrlap adatáramlása (végponttól végpontig)
 
 ```
-Látogató weboldala (beágyazott widget)                Rendli admin
+Látogató weboldala (beágyazott widget)                Kvitli admin
   ├─ beolvassa: form_configs/<uid>  (szolgáltatások, mezők)
   └─ beküldés → inbox/<uid>/items ─────onSnapshot──────►  leads.js: state.leads-be húzza,
                                                             törli a sort, renderel

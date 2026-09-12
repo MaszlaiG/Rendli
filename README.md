@@ -1,15 +1,15 @@
-# Rendli
+# Kvitli
 
 **Language / Nyelv:** [English](#english) · [Magyar](#magyar)
 
-**🌐 Live / Élő oldal:** <https://maszlaig.github.io/Rendli/>
+**🌐 Live / Élő oldal:** <https://maszlaig.github.io/Kvitli/>
 **📄 Részletes tervdokumentáció / Full design doc:** [`dokumentumok/`](dokumentumok/) (PDF, HU + EN)
 
 ---
 
 ## English
 
-**Rendli** is an account-based **business manager** web app for freelancers and small businesses — leads, orders, projects, clients, invoices, contracts, income/expenses in one place, plus an **embeddable order form** whose submissions appear automatically. Data is stored per account in **Firebase** (Auth + Firestore). No build step, no framework: plain HTML/CSS/JS. Bilingual (HU/EN), light/dark/auto "Studio" design.
+**Kvitli** is an account-based **business manager** web app for freelancers and small businesses — leads, orders, projects, clients, invoices, contracts, income/expenses in one place, plus an **embeddable order form** whose submissions appear automatically. Data is stored per account in **Firebase** (Auth + Firestore). No build step, no framework: plain HTML/CSS/JS. Bilingual (HU/EN), light/dark/auto "Studio" design.
 
 **Highlights**
 - Lead → **offer** → **contract** → order workflow; offers are accepted and contracts **signed online** by the client, auto-updating the status.
@@ -25,7 +25,7 @@ Setup notes: `dokumentumok/BEALLITAS-Firebase.txt`, `dokumentumok/BEALLITAS-Emai
 
 ## Magyar
 
-A **Rendli** fiók-alapú **vállalkozáskezelő** webapp szabadúszóknak és kisvállalkozásoknak — megkeresések, megrendelések, projektek, ügyfelek, számlák, szerződések, bevétel/kiadás egy helyen, plusz egy **beágyazható megrendelő-űrlap**, amelynek leadásai automatikusan megjelennek. Az adat fiókonként a **Firebase**-ben (Auth + Firestore). Nincs build lépés, nincs keretrendszer: tiszta HTML/CSS/JS. Kétnyelvű (HU/EN), világos/sötét/auto „Stúdió" dizájn.
+A **Kvitli** fiók-alapú **vállalkozáskezelő** webapp szabadúszóknak és kisvállalkozásoknak — megkeresések, megrendelések, projektek, ügyfelek, számlák, szerződések, bevétel/kiadás egy helyen, plusz egy **beágyazható megrendelő-űrlap**, amelynek leadásai automatikusan megjelennek. Az adat fiókonként a **Firebase**-ben (Auth + Firestore). Nincs build lépés, nincs keretrendszer: tiszta HTML/CSS/JS. Kétnyelvű (HU/EN), világos/sötét/auto „Stúdió" dizájn.
 
 **Kiemelt funkciók**
 - Megkeresés → **ajánlat** → **szerződés** → megrendelés folyamat; az ajánlatot elfogadják, a szerződést az ügyfél **online írja alá**, a státusz automatikusan frissül.

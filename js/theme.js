@@ -10,7 +10,7 @@
       id: 'kompakt',
       name: 'Stúdió',
       desc: 'Tiszta, sans betűs, feszes rács.',
-      sw: ['#3b5bdb', '#f5f7fb', '#2e9e6b']
+      sw: ['#2378be', '#f5f7fb', '#7cb342']
     }
   ];
   function themeExists(id) {

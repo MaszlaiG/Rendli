@@ -110,7 +110,7 @@ function initPortfolioInboxSync() {
         }
       },
       (err) => {
-        console.warn('[Rendli] inbox listener:', err);
+        console.warn('[Kvitli] inbox listener:', err);
         showLeadsSyncError('A beérkező rendelések szinkronizálása most szünetel.');
       }
     );
@@ -574,7 +574,7 @@ function _offerDetailsHtml(items, t, validUntil) {
   const B = '#e4eaf5',
     L = '#5d6b85',
     V = '#171c28',
-    AC = '#3b5bdb';
+    AC = '#2378be';
   const th =
     'padding:9px 10px;border-bottom:2px solid #171c28;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:' +
     L +
@@ -691,7 +691,7 @@ function viewOffer(leadId) {
     o.validUntil || ''
   );
   const si = state.sellerInfo || {};
-  const bizName = si.name || 'Rendli';
+  const bizName = si.name || 'Kvitli';
   const to = lead.name
     ? '<p style="font-size:13px;color:#5d6b85;margin:0 0 14px">Címzett: <strong style="color:#171c28">' +
       escHtml(lead.name) +
@@ -717,7 +717,7 @@ function viewOffer(leadId) {
       escHtml(bizName) +
       '</title>' +
       "<style>@page{margin:16mm}body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#1a1a1a;max-width:820px;margin:0 auto;padding:28px 24px}h1{color:#171c28;font-size:22px}" +
-      '.print-btn{position:fixed;top:14px;right:14px;background:#3b5bdb;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer}' +
+      '.print-btn{position:fixed;top:14px;right:14px;background:#2378be;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer}' +
       '@media print{.print-btn{display:none}}</style></head><body>' +
       '<button class="print-btn" onclick="window.print()">Nyomtatás / Mentés PDF-ként</button>' +
       '<h1>Árajánlatunk</h1>' +
@@ -758,7 +758,7 @@ async function sendOffer() {
   const message = (document.getElementById('offer-message').value || '').trim();
   const validUntil = document.getElementById('offer-valid').value || '';
   const si = state.sellerInfo || {};
-  const bizName = si.name || 'Rendli';
+  const bizName = si.name || 'Kvitli';
   const ownerMail = si.email || (LocalStore.currentUser && LocalStore.currentUser.email) || '';
   const details = _offerDetailsHtml(items, t, validUntil);
   // Letölthető PDF-nézet linkje: az ajánlat adata base64url-ként a link # részében
@@ -806,7 +806,7 @@ async function sendOffer() {
     actions +=
       '<a href="' +
       pdfUrl +
-      '" style="display:inline-block;background:#3b5bdb;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128196; Letöltés PDF-ben</a>';
+      '" style="display:inline-block;background:#2378be;color:#ffffff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">&#128196; Letöltés PDF-ben</a>';
   actions +=
     '<a href="' +
     acceptHref +
@@ -814,7 +814,7 @@ async function sendOffer() {
   actions +=
     '<a href="' +
     qMail +
-    '" style="display:inline-block;background:#ffffff;color:#3b5bdb;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #3b5bdb;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">Kérdésem van</a>';
+    '" style="display:inline-block;background:#ffffff;color:#2378be;font-weight:700;font-size:14px;padding:10px 20px;border:2px solid #2378be;border-radius:10px;text-decoration:none;margin:0 8px 8px 0">Kérdésem van</a>';
   const btn = document.getElementById('offer-send-btn');
   if (btn) btn.disabled = true;
   setNote('Küldés folyamatban…', false);
